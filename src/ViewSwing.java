@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -14,6 +16,9 @@ public class ViewSwing {
     private static CorrelationFunction correlationFunction;
     private static DistributionLaw distributionLaw;
     private static HypothesisCheck hypothesisCheck;
+    private static final Border etched = BorderFactory.createEtchedBorder();
+    private static final Color color = new Color(219, 220, 155);
+    private static final Dimension dimensionForJCombobox = new Dimension(221,25);
 
     ViewSwing(){
         begin();
@@ -23,18 +28,23 @@ public class ViewSwing {
     private void begin(){
         jFrame = new JFrame("Генерация случайного процесса");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jFrame.setPreferredSize(new Dimension(400, 630));
+        jFrame.setPreferredSize(new Dimension(290, 660));
 
         JPanel jPanel = new JPanel(new VerticalLayout());
+        jPanel.setPreferredSize(new Dimension(290, 660));
+        jPanel.setBackground(color);
+        jPanel.setBorder(BorderFactory.createTitledBorder(etched, "Параметры случайного процесса"));
 
-        jPanel.add(new JLabel("Параметры случайного процесса"));
-        jPanel.add(new JLabel("количество отсчетов"));
+        jPanel.add(new JLabel("<html> <br>количество отсчетов</html>"));
 
-        JTextField numberOfSamples = new JTextField(5);
-        numberOfSamples.addActionListener(new ActionListener() {
+        JTextField numberOfSamples = new JTextField(26);
+        numberOfSamples.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberOfSamples(numberOfSamples.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!numberOfSamples.getText().isEmpty() && !CheckParameters.isNumberOfSamples(numberOfSamples.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_NUMBER_OF_SAMPLES);
                     numberOfSamples.setText("");
                 }
@@ -48,7 +58,9 @@ public class ViewSwing {
         jPanel.add(new JLabel("способ генерации случайных величин"));
         String[] sWaysOfGeneration = {"корреляционная функция", "с заданным законном распределения"};
         JRadioButton rbCorrelationFunction = new JRadioButton("корреляционная функция",true);
+        rbCorrelationFunction.setBackground(color);
         JRadioButton rbDistributionLaw = new JRadioButton("с заданным законном распределения",false);
+        rbDistributionLaw.setBackground(color);
         ButtonGroup waysOfGeneration = new ButtonGroup();
         waysOfGeneration.add(rbCorrelationFunction);
         waysOfGeneration.add(rbDistributionLaw);
@@ -56,7 +68,7 @@ public class ViewSwing {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (rbCorrelationFunction.isSelected()) {
-                    jpCorrelationFunction.setPreferredSize(new Dimension(jpDistributionLaw.getWidth(),180));
+                    jpCorrelationFunction.setPreferredSize(jpDistributionLaw.getPreferredSize());
                     jpCorrelationFunction.setVisible(true);
                     jpDistributionLaw.setVisible(false);
                     jpDistributionLaw.setPreferredSize(new Dimension(0,0));
@@ -67,7 +79,7 @@ public class ViewSwing {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (rbDistributionLaw.isSelected()) {
-                    jpDistributionLaw.setPreferredSize(new Dimension(jpCorrelationFunction.getWidth(),200));
+                    jpDistributionLaw.setPreferredSize(jpCorrelationFunction.getPreferredSize());
                     jpDistributionLaw.setVisible(true);
                     jpCorrelationFunction.setVisible(false);
                     jpCorrelationFunction.setPreferredSize(new Dimension(0,0));
@@ -80,32 +92,39 @@ public class ViewSwing {
         jPanel.add(jpCorrelationFunction);
         jPanel.add(jpDistributionLaw);
 
-        jPanel.add(new JLabel("Проверка гипотезы"));
-        jPanel.add(new JLabel("критерий значимости"));
+        JPanel jpCheck = new JPanel(new VerticalLayout());
+        jpCheck.setPreferredSize(new Dimension(250, 210));
+        jpCheck.setBorder(BorderFactory.createTitledBorder(etched, "Проверка гипотезы"));
+        jpCheck.add(new JLabel("<html> <br>критерий значимости </html>"));
 
         String[] sSignificanceCriterion = {"критерий согласия Пирсона", "критерий согласия Колмогорова"};
         JComboBox significanceCriterion = new JComboBox(sSignificanceCriterion);
+        significanceCriterion.setPreferredSize(dimensionForJCombobox);
         significanceCriterion.setEditable(true);
-        jPanel.add(significanceCriterion);
+        jpCheck.add(significanceCriterion);
 
-        jPanel.add(new JLabel("уровень значимости"));
+        jpCheck.add(new JLabel("уровень значимости"));
         String[] sSignificanceLevel = {"0.001", "0.01", "0.025", "0.05", "0.1", "0.2"};
         JComboBox significanceLevel = new JComboBox(sSignificanceLevel);
+        significanceLevel.setPreferredSize(dimensionForJCombobox);
         significanceLevel.setEditable(true);
-        jPanel.add(significanceLevel);
+        jpCheck.add(significanceLevel);
 
-        jPanel.add(new JLabel("количество степеней свободы"));
-        JTextField numberOfDegreesOfFreedom = new JTextField(5);
-        numberOfDegreesOfFreedom.addActionListener(new ActionListener() {
+        jpCheck.add(new JLabel("количество степеней свободы"));
+        JTextField numberOfDegreesOfFreedom = new JTextField(23);
+        numberOfDegreesOfFreedom.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberOfDegreesOfFreedom(numberOfDegreesOfFreedom.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!numberOfDegreesOfFreedom.getText().isEmpty() && !CheckParameters.isNumberOfDegreesOfFreedom(numberOfDegreesOfFreedom.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_NUMBER_OF_DEGREES_OF_FREEDOM);
                     numberOfDegreesOfFreedom.setText("");
                 }
             }
         });
-        jPanel.add(numberOfDegreesOfFreedom);
+        jpCheck.add(numberOfDegreesOfFreedom);
 
         JButton check = new JButton("Проверить гипотезу");
         check.addActionListener(new ActionListener() {
@@ -124,7 +143,9 @@ public class ViewSwing {
                 }
             }
         });
-        jPanel.add(check);
+        jpCheck.add(check);
+
+        jPanel.add(jpCheck);
 
         JButton result = new JButton("Расчитать характеристики");
         result.addActionListener(new ActionListener() {
@@ -155,19 +176,24 @@ public class ViewSwing {
     /** Метод создания панели корреляционной функции*/
     private void setJpCorrelationFunction(){
         jpCorrelationFunction = new JPanel(new VerticalLayout());
-        jpCorrelationFunction.setPreferredSize(new Dimension(400,180));
-        jpCorrelationFunction.add(new JLabel("вид корреляционной функции"));
+        jpCorrelationFunction.setPreferredSize(new Dimension(250,210));
+        jpCorrelationFunction.setBorder(BorderFactory.createTitledBorder(etched, "Параметры корреляционной функции"));
+        jpCorrelationFunction.add(new JLabel("<html> <br> вид корреляционной функции</html>"));
         String[] sKindCorrelationFunction = { "Монотонная","Колебательная"};
         JComboBox kindCorrelationFunction = new JComboBox(sKindCorrelationFunction);
+        kindCorrelationFunction.setPreferredSize(dimensionForJCombobox);
         kindCorrelationFunction.setEditable(true);
 
         JPanel jpMonotone = new JPanel(new VerticalLayout());
         jpMonotone.add(new JLabel("значение частоты колебания"));
-        JTextField oscillationFrequencyValue  = new JTextField(5);
-        oscillationFrequencyValue.addActionListener(new ActionListener() {
+        JTextField oscillationFrequencyValue  = new JTextField(20);
+        oscillationFrequencyValue.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberFrom0_1to10(oscillationFrequencyValue.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!oscillationFrequencyValue.getText().isEmpty() && !CheckParameters.isNumberFrom0_1to10(oscillationFrequencyValue.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_OSCILLATION_FREQUENCY_VALUE);
                     oscillationFrequencyValue.setText("");
                 }
@@ -191,10 +217,13 @@ public class ViewSwing {
         jpCorrelationFunction.add(kindCorrelationFunction);
 
         jpCorrelationFunction.add(new JLabel("показатель затухания"));
-        JTextField attenuation_rates = new JTextField(5);
-        attenuation_rates.addActionListener(new ActionListener() {
+        JTextField attenuation_rates = new JTextField(20);
+        attenuation_rates.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
                 if (!CheckParameters.isNumberFrom0_1to10(attenuation_rates.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_ATTENUATION_RATES);
                     attenuation_rates.setText("");
@@ -231,9 +260,11 @@ public class ViewSwing {
     /** Метод создания панели закона распределения*/
     private void setJpDistributionLaw(){
         jpDistributionLaw = new JPanel(new VerticalLayout());
-        jpDistributionLaw.add(new JLabel("вид распределения"));
+        jpDistributionLaw.setBorder(BorderFactory.createTitledBorder(etched, "Параметры для закона распределения"));
+        jpDistributionLaw.add(new JLabel("<html> <br>вид распределения </html>"));
         String[] sKindDistributionLaw = {"Нормальное", "Равномерное","Показательное"};
         JComboBox kindDistributionLaw = new JComboBox(sKindDistributionLaw);
+        kindDistributionLaw.setPreferredSize(dimensionForJCombobox);
         kindDistributionLaw.setEditable(true);
         jpDistributionLaw.add(kindDistributionLaw);
 
@@ -327,11 +358,14 @@ public class ViewSwing {
     private JPanel getJPNormal(){
         JPanel jpNormal = new JPanel(new VerticalLayout());
         jpNormal.add(new JLabel("математическое ожидание"));
-        JTextField expected_value = new JTextField(5);
-        expected_value.addActionListener(new ActionListener() {
+        JTextField expected_value = new JTextField(20);
+        expected_value.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberFrom_100to100(expected_value.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!expected_value.getText().isEmpty() && !CheckParameters.isNumberFrom_100to100(expected_value.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_EXPECTED_VALUE);
                     expected_value.setText("");
                 }
@@ -339,11 +373,14 @@ public class ViewSwing {
         });
         jpNormal.add(expected_value);
         jpNormal.add(new JLabel("дисперсия"));
-        JTextField dispersion = new JTextField(5);
-        dispersion.addActionListener(new ActionListener() {
+        JTextField dispersion = new JTextField(20);
+        dispersion.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberFrom0_1to10(dispersion.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!dispersion.getText().isEmpty() && !CheckParameters.isNumberFrom0_1to10(dispersion.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_DISPERSION);
                     dispersion.setText("");
                 }
@@ -357,11 +394,14 @@ public class ViewSwing {
     private JPanel getJPUniform(){
         JPanel jpUniform = new JPanel(new VerticalLayout());
         jpUniform.add(new JLabel("правая граница"));
-        JTextField right = new JTextField(5);
-        right.addActionListener(new ActionListener() {
+        JTextField right = new JTextField(20);
+        right.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberFrom_100to100(right.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!right.getText().isEmpty() && !CheckParameters.isNumberFrom_100to100(right.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_RIGHT);
                     right.setText("");
                 }
@@ -369,11 +409,14 @@ public class ViewSwing {
         });
         jpUniform.add(right);
         jpUniform.add(new JLabel("левая граница"));
-        JTextField left = new JTextField(5);
-        left.addActionListener(new ActionListener() {
+        JTextField left = new JTextField(20);
+        left.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isNumberFrom_100to100(left.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!left.getText().isEmpty() && !CheckParameters.isNumberFrom_100to100(left.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_LEFT);
                     left.setText("");
                 }
@@ -388,11 +431,14 @@ public class ViewSwing {
     private JPanel getJPExponential(){
         JPanel jpExponential = new JPanel(new VerticalLayout());
         jpExponential.add(new JLabel("интенсивность"));
-        JTextField intensity = new JTextField(5);
-        intensity.addActionListener(new ActionListener() {
+        JTextField intensity = new JTextField(20);
+        intensity.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!CheckParameters.isIntensity(intensity.getText())){
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!intensity.getText().isEmpty() && !CheckParameters.isIntensity(intensity.getText())){
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_INTENSITY);
                     intensity.setText("");
                 }
@@ -434,7 +480,7 @@ public class ViewSwing {
                 // Определение предпочтительного размера компонента
                 Dimension pref = list[i].getPreferredSize();
                 // Размещение компонента на экране
-                list[i].setBounds(5, currentY, pref.width, pref.height);
+                list[i].setBounds(10, currentY, pref.width, pref.height);
                 // Учитываем промежуток в 5 пикселов
                 currentY += 5;
                 // Смещаем вертикальную позицию компонента
