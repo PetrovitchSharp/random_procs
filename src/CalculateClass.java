@@ -21,16 +21,16 @@ public class CalculateClass {
                 );
             }
             if (proc.getDistributionLaw().getKindDistributionLaw().equals("Равномерное")){
-                sample = getExponentialDistribution(
-                        proc.getNumberOfSamples(),
-                        proc.getDistributionLaw().getIntensity()
-                );
-            }
-            if (proc.getDistributionLaw().getKindDistributionLaw().equals("Показательноее")){
                 sample = getUniformDistribution(
                         proc.getNumberOfSamples(),
                         proc.getDistributionLaw().getLeft(),
                         proc.getDistributionLaw().getRight()
+                );
+            }
+            if (proc.getDistributionLaw().getKindDistributionLaw().equals("Показательное")){
+                sample = getExponentialDistribution(
+                        proc.getNumberOfSamples(),
+                        proc.getDistributionLaw().getIntensity()
                 );
             }
         }
