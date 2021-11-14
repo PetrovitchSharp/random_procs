@@ -3,7 +3,7 @@ public class CheckParameters {
     public static boolean isNumberOfSamples(String str) {
         try {
             int number = Integer.parseInt(str);
-            if (number < 500 || number > 1000) return false;
+            if (number < 500 || number > 10000) return false;
         } catch(NumberFormatException e){
             return false;
         }
