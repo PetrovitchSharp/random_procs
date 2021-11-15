@@ -1,3 +1,5 @@
+import org.apache.commons.math3.stat.StatUtils;
+import org.jfree.data.function.Function2D;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
 import org.jfree.data.xy.XYSeries;
@@ -215,14 +217,14 @@ public class CalculateClass {
     /**
      * Тест Колмогорова-Смирнова
      * @param procSample Выборка точек из СП
-     * @param realSample Выборка точек теоретической функции
+     * @param realFunction Теоретическая функция
      * @param checkParams Параметры для теста
      * @return Пройден \ Не пройден тест
      */
-    public static boolean KSTest(double[] procSample, double[] realSample, HypothesisCheck checkParams){
+    public static boolean KSTest(double[] procSample, Function2D realFunction, HypothesisCheck checkParams){
         var table = new KSTable();
 
-        var testValue = KSTestValue(procSample, realSample);
+        var testValue = KSTestValue(procSample, realFunction);
         var critValue = table.getCritivalValue(checkParams.getNumberOfDegreesOfFreedom(), checkParams.getSignificanceLevel());
 
         return testValue <= critValue;
@@ -339,25 +341,18 @@ public class CalculateClass {
     /**
      * Вычисление статистики для критерия Колмогорова-Смирнова
      * @param procSample Выборка точек из СП
-     * @param realSample Выборка точек теоретической функции
+     * @param realFunction Теоретическая функция
      * @return Значение статистики
      */
-    private static double KSTestValue(double[] procSample, double[] realSample){
+    private static double KSTestValue(double[] procSample, Function2D realFunction){
         var len = procSample.length;
         var d = new double[len];
 
         for (var i = 0; i < len; i++){
-            d[i] = Math.max(procSample[i] - realSample[i], realSample[i] - procSample[i]);
+            d[i] = Math.max(procSample[i] - realFunction.getValue(i), realFunction.getValue(i) - procSample[i]);
         }
 
-        var dmax = 0.;
-        for (var di: d) {
-            if (di > dmax){
-                dmax = di;
-            }
-        }
-
-        return dmax;
+        return StatUtils.max(d);
     }
 
     /**
