@@ -185,6 +185,64 @@ public class CalculateClass {
     }
 
     /**
+     * Расчет количества столбцов гистограммы по формуле Стерджесса
+     * @param numOfSamples Количество отсчетов
+     * @return Количество столбцов гистограммы
+     */
+    public static int getNumOfBins(int numOfSamples){
+        return (int)Math.round(1 + 3.322*Math.log10(numOfSamples));
+    }
+
+    /**
+     * Расчет количества отсчетов для графика функции распределения
+     * @param numOfSamples Количество отсчетов
+     * @return Количество отсчетов для графика функции распределения
+     */
+    public static int getNumOfDistFunctionSamples(int numOfSamples){
+        return (int)Math.round(Math.exp(1)*Math.log(numOfSamples));
+    }
+
+    /**
+     * Тест Колмогорова-Смирнова
+     * @param procSample Выборка точек из СП
+     * @param realSample Выборка точек теоретической функции
+     * @param checkParams Параметры для теста
+     * @return Пройден \ Не пройден тест
+     */
+    public static boolean KSTest(double[] procSample, double[] realSample, HypothesisCheck checkParams){
+        var table = new KSTable();
+
+        var testValue = KSTestValue(procSample, realSample);
+        var critValue = table.getCritivalValue(checkParams.getNumberOfDegreesOfFreedom(), checkParams.getSignificanceLevel());
+
+        return testValue <= critValue;
+    }
+
+    /**
+     * Вычисление статистики для критерия Колмогорова-Смирнова
+     * @param procSample Выборка точек из СП
+     * @param realSample Выборка точек теоретической функции
+     * @return Значение статистики
+     */
+    private static double KSTestValue(double[] procSample, double[] realSample){
+        var len = procSample.length;
+        var d = new double[len];
+
+        for (var i = 0; i < len; i++){
+            d[i] = Math.max(procSample[i] - realSample[i], realSample[i] - procSample[i]);
+        }
+
+        var dmax = 0.;
+        for (var di: d) {
+            if (di > dmax){
+                dmax = di;
+            }
+        }
+
+        return dmax;
+    }
+
+    /**
      * Генерация равномерного на [0;1) распределения
      * @param numOfSamples Количество отсчетов
      * @return Массив чисел, равномерно распределенных на [0;1)
