@@ -1,3 +1,9 @@
+import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.statistics.HistogramType;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import java.util.Arrays;
 import java.util.Random;
 
 public class CalculateClass {
@@ -202,6 +208,10 @@ public class CalculateClass {
         return (int)Math.round(Math.exp(1)*Math.log(numOfSamples));
     }
 
+    public static int getNumOfCorrFunctionSamples(CorrelationFunction corrFunc, int numOfSaamples){
+        return 0; //TODO: Найти формулы для количества отсчетов, необходимого для построения корр функции
+    }
+
     /**
      * Тест Колмогорова-Смирнова
      * @param procSample Выборка точек из СП
@@ -216,6 +226,114 @@ public class CalculateClass {
         var critValue = table.getCritivalValue(checkParams.getNumberOfDegreesOfFreedom(), checkParams.getSignificanceLevel());
 
         return testValue <= critValue;
+    }
+
+    /**
+     * Подготовка набора данных для визуализации эмпирической функции распределения
+     * @param proc СП
+     * @param lenOfSeries Количество точек графика
+     * @return Набор данных для визуализации эмпирической функции распределения
+     */
+    public static XYSeriesCollection getDistributionFunctionData(double[] proc, int lenOfSeries){
+        Arrays.sort(proc);
+
+        var shift = proc.length / (lenOfSeries - 1);
+
+        var series = new XYSeries("dist function");
+        for (var i = 0; i < proc.length; i+=shift){
+            series.add(proc[i],(double) i/proc.length);
+        }
+        series.add(proc[proc.length-1],1);
+
+        return new XYSeriesCollection(series);
+    }
+
+    /**
+     * Подготовка набора данных для визуализации гистограммы распределения
+     * @param proc СП
+     * @param numOfBins Количество столбцов гистограммы
+     * @return Набор данных для визуализации гистограммы распределения
+     */
+    public static HistogramDataset getDensityFunctionData(double[] proc, int numOfBins){
+        var hist = new HistogramDataset();
+        hist.addSeries("density", proc, numOfBins);
+        hist.setType(HistogramType.SCALE_AREA_TO_1);
+
+        return hist;
+    }
+
+    /**
+     * Подготовка набора данных для визуализации эмпирической корреляционной функции
+     * @param proc СП
+     * @param lenOfSeries Количество точек графика
+     * @return Набор данных для визуализации эмпирической корреляционной функции
+     */
+    public static XYSeriesCollection getCorrelationFunctionData(double[] proc, int lenOfSeries){
+        var series = new XYSeries("corr function");
+        var shift = proc.length / (lenOfSeries - 1);
+
+        for (var i = 0; i < proc.length; i+=shift){
+            var ls = getLeftShiftedArray(proc, i);
+            var rs = getRightShiftedArray(proc, i);
+            series.add(i, getCorrelation(ls, rs));
+        }
+        series.add(proc.length - 1, 0);
+
+        return new XYSeriesCollection(series);
+    }
+
+    /**
+     * Получение обрезанного справа СП
+     * @param proc СП
+     * @param shift Сдвиг
+     * @return Обрезанный СП
+     */
+    private static double[] getRightShiftedArray(double[] proc, int shift){
+        var shiftedArray = new double[proc.length - shift];
+
+        if (proc.length - shift >= 0) System.arraycopy(proc, 0, shiftedArray, 0, proc.length - shift);
+
+        return shiftedArray;
+    }
+
+    /**
+     * Получение сдвинутого слева СП
+     * @param proc СП
+     * @param shift Сдвиг
+     * @return Сдвинутый СП
+     */
+    private static double[] getLeftShiftedArray(double[] proc, int shift){
+        var shiftedArray = new double[proc.length - shift];
+
+        for (var i = shift - 1; i<proc.length; i++){
+            shiftedArray[i - shift - 1] = proc[i];
+        }
+
+        return shiftedArray;
+    }
+
+    /**
+     * Расчет автокорреляции СП в заданной точке
+     * @param originalProcess Обрезанный СП
+     * @param shiftedProcess Сдвинутый СП
+     * @return Коэффициент автокорреляции
+     */
+    private static double getCorrelation(double[] originalProcess, double[] shiftedProcess){
+        var originalMean = getMean(originalProcess);
+        var shiftedMean = getMean(shiftedProcess);
+        var len = originalProcess.length;
+
+        var sumOfShifts = 0.;
+        var originalSumOfSquaredDeviations = 0.;
+        var shiftedSumOfSquaredDeviations = 0.;
+
+        for (var i = 0; i < len; i++){
+            sumOfShifts += (originalProcess[i] - originalMean)*(shiftedProcess[i] - shiftedMean);
+            originalSumOfSquaredDeviations += Math.pow((originalProcess[i] - originalMean),2);
+            shiftedSumOfSquaredDeviations += Math.pow((shiftedProcess[i] - shiftedMean), 2);
+        }
+
+        return sumOfShifts / Math.sqrt(originalSumOfSquaredDeviations) / Math.sqrt(shiftedSumOfSquaredDeviations);
     }
 
     /**
