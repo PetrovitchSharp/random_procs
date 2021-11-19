@@ -54,7 +54,7 @@ public class ChartsClass {
      * @return График эмпирической КФ
      */
     public static JFreeChart getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
-        var lenOfSeries = CalculateClass.getNumOfCorrFunctionSamples(corrFuncParams);
+        var lenOfSeries = CalculateClass.getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.1);
         var data = CalculateClass.getCorrelationFunctionData(proc, lenOfSeries);
 
         return ChartFactory.createXYLineChart(

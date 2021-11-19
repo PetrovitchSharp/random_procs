@@ -44,10 +44,14 @@ public class CalculateClass {
         }
         if (proc.getWaysOfGeneration().equals("корреляционная функция")){
             if (proc.getCorrelationFunction().getKindCorrelationFunction().equals("Монотонная")){
+
                 sample = getMonotonousCorrFunction(
                         proc.getNumberOfSamples(),
                         proc.getCorrelationFunction().getAttenuationRates(),
-                        0.01
+                        getTimeStep(
+                                proc.getCorrelationFunction(),
+                                proc.getNumberOfSamples()
+                                )
                 );
             }
             if (proc.getCorrelationFunction().getKindCorrelationFunction().equals("Колебательная")){
@@ -55,7 +59,10 @@ public class CalculateClass {
                         proc.getNumberOfSamples(),
                         proc.getCorrelationFunction().getAttenuationRates(),
                         proc.getCorrelationFunction().getOscillationFrequencyValue(),
-                        0.01
+                        getTimeStep(
+                                proc.getCorrelationFunction(),
+                                proc.getNumberOfSamples()
+                        )
                 );
             }
         }
@@ -213,10 +220,12 @@ public class CalculateClass {
     /**
      * Расчет количества отсчетов для графика КФ
      * @param corrFunc Параметры КФ
+     * @param numOfSamples Количество отсчетов
+     * @param eps Погрешность аппроксимации
      * @return Количество отсчетов для графика КФ
      */
-    public static int getNumOfCorrFunctionSamples(CorrelationFunction corrFunc){
-        return 0; //TODO: Найти формулы для количества отсчетов, необходимого для построения корр функции
+    public static int getNumOfCorrFunctionSamples(CorrelationFunction corrFunc, int numOfSamples, double eps){
+        return (int)Math.round(numOfSamples / getTimeStep(corrFunc, numOfSamples) * numOfSamples / eps);
     }
 
     /**
@@ -629,5 +638,29 @@ public class CalculateClass {
         }
 
         return sum/proc.length;
+    }
+
+    /**
+     * Расчет "временного" сдвига для КФ
+     * @param corrFunction Параметры КФ
+     * @param numOfSamples Количество отсчетов
+     * @return Сдвиг для КФ
+     */
+    private static double getTimeStep(CorrelationFunction corrFunction, int numOfSamples){
+        double tau, tauMax;
+        if (corrFunction.getKindCorrelationFunction().equals("Монотонная")){
+            var alpha = corrFunction.getAttenuationRates();
+            tau = 1. / alpha;
+            tauMax = 3*tau;
+        }
+        else{
+            var alpha = corrFunction.getAttenuationRates();
+            var omega = corrFunction.getOscillationFrequencyValue();
+            var mu = omega / alpha;
+
+            tau = alpha / (Math.pow(alpha,2) + Math.pow(omega,2));
+            tauMax = 3 * (1 + Math.pow(mu,2)) * tau;
+        }
+        return tauMax / numOfSamples;
     }
 }
