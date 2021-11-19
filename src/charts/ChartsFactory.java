@@ -1,3 +1,5 @@
+package charts;
+
 import correlationFunctions.MonotoneCorrelationFunction;
 import correlationFunctions.OscillatingCorrelationFunction;
 import densityFunctions.ExponentialDensityFunction;
@@ -11,16 +13,24 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.function.Function2D;
 import org.jfree.data.general.DatasetUtils;
+import params.CorrelationFunction;
+import params.DistributionLaw;
 
-public class ChartsClass {
+import static charts.DataFactory.*;
+import static math.Calculations.getTimeStep;
+
+/**
+ * Методы, генерирующие объекты-графики
+ */
+public class ChartsFactory {
     /**
      * Создание объекта-графика для эмпирической функции распределения
      * @param proc СП
      * @return График эмпирической функции распределения
      */
     public static JFreeChart getExperimentalDistributionFunctionChart(double[] proc){
-        var lenOfSeries = CalculateClass.getNumOfDistFunctionSamples(proc.length);
-        var data = CalculateClass.getDistributionFunctionData(proc, lenOfSeries);
+        var lenOfSeries = getNumOfDistFunctionSamples(proc.length);
+        var data = getDistributionFunctionData(proc, lenOfSeries);
 
         return ChartFactory.createXYStepChart(
                 "Эмпирическая функция распределения",
@@ -36,8 +46,8 @@ public class ChartsClass {
      * @return Гистограмма плотности
      */
     public static JFreeChart getExperimentalDensityFunctionHistogram(double[] proc){
-        var numOfBins = CalculateClass.getNumOfBins(proc.length);
-        var data = CalculateClass.getDensityFunctionData(proc, numOfBins);
+        var numOfBins = getNumOfBins(proc.length);
+        var data = getDensityFunctionData(proc, numOfBins);
 
         return ChartFactory.createHistogram(
                 "Гистограмма распределения",
@@ -54,8 +64,8 @@ public class ChartsClass {
      * @return График эмпирической КФ
      */
     public static JFreeChart getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
-        var lenOfSeries = CalculateClass.getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.1);
-        var data = CalculateClass.getCorrelationFunctionData(proc, lenOfSeries);
+        var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.1);
+        var data = getCorrelationFunctionData(proc, lenOfSeries);
 
         return ChartFactory.createXYLineChart(
                 "Эмпирическая корреляционная функция",
@@ -155,5 +165,32 @@ public class ChartsClass {
         );
     }
 
+    /**
+     * Расчет количества столбцов гистограммы по формуле Стерджесса
+     * @param numOfSamples Количество отсчетов
+     * @return Количество столбцов гистограммы
+     */
+    private static int getNumOfBins(int numOfSamples){
+        return (int)Math.round(1 + 3.322*Math.log10(numOfSamples));
+    }
 
+    /**
+     * Расчет количества отсчетов для графика функции распределения
+     * @param numOfSamples Количество отсчетов
+     * @return Количество отсчетов для графика функции распределения
+     */
+    private static int getNumOfDistFunctionSamples(int numOfSamples){
+        return (int)Math.round(Math.exp(1)*Math.log(numOfSamples));
+    }
+
+    /**
+     * Расчет количества отсчетов для графика КФ
+     * @param corrFunc Параметры КФ
+     * @param numOfSamples Количество отсчетов
+     * @param eps Погрешность аппроксимации
+     * @return Количество отсчетов для графика КФ
+     */
+    private static int getNumOfCorrFunctionSamples(CorrelationFunction corrFunc, int numOfSamples, double eps){
+        return (int)Math.round(numOfSamples / getTimeStep(corrFunc, numOfSamples) * numOfSamples / eps);
+    }
 }

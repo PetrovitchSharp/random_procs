@@ -1,3 +1,9 @@
+import math.Calculations;
+import params.CorrelationFunction;
+import params.DistributionLaw;
+import params.HypothesisCheck;
+import params.RandomProcess;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
@@ -118,7 +124,7 @@ public class ViewSwing {
                     randomProcess.setWaysOfGeneration(rbDistributionLaw.isSelected() ? sWaysOfGeneration[1] : sWaysOfGeneration[0]);
                     randomProcess.setNumberOfSamples(numberOfSamples.getText().isEmpty() ? null : Integer.parseInt(numberOfSamples.getText()));
 
-                    proc =  CalculateClass.generateRandomProc(randomProcess);
+                    proc =  RandomProcGenerator.generateRandomProc(randomProcess);
                     getTable();
                     //TODO: вызов метода рассчета результата, вызов метода для вывода информации
                 } catch (Exception exception){
@@ -521,18 +527,18 @@ public class ViewSwing {
             headers = new String[]{"Момент", "Теоретическое значение", "Эмпирическое значение"};
             //Массив содержащий информацию для таблицы
             data = new Object[][]{
-                    {"1", CalculateClass.getMathematicalExpectation(randomProcess), CalculateClass.getMean(proc)},
-                    {"2", CalculateClass.getTheoreticalDispertion(randomProcess), CalculateClass.getExperimentalDispertion(proc)},
-                    {"3", CalculateClass.getTheoreticalAsymmetryCoefficient(randomProcess), CalculateClass.getExperimentalAsymmetryCoefficient(proc)},
-                    {"4", CalculateClass.getTheoreticalKurtosisCoefficient(randomProcess), CalculateClass.getExperimentalKurtosisCoefficient(proc)}
+                    {"1", Calculations.getMathematicalExpectation(randomProcess), Calculations.getMean(proc)},
+                    {"2", Calculations.getTheoreticalDispertion(randomProcess), Calculations.getExperimentalDispertion(proc)},
+                    {"3", Calculations.getTheoreticalAsymmetryCoefficient(randomProcess), Calculations.getExperimentalAsymmetryCoefficient(proc)},
+                    {"4", Calculations.getTheoreticalKurtosisCoefficient(randomProcess), Calculations.getExperimentalKurtosisCoefficient(proc)}
             };
         } else{
             headers = new String[]{"Момент","Эмпирическое значение"};
             data = new Object[][]{
-                    {"1", CalculateClass.getMean(proc)},
-                    {"2", CalculateClass.getExperimentalDispertion(proc)},
-                    {"3", CalculateClass.getExperimentalAsymmetryCoefficient(proc)},
-                    {"4", CalculateClass.getExperimentalKurtosisCoefficient(proc)}
+                    {"1", Calculations.getMean(proc)},
+                    {"2", Calculations.getExperimentalDispertion(proc)},
+                    {"3", Calculations.getExperimentalAsymmetryCoefficient(proc)},
+                    {"4", Calculations.getExperimentalKurtosisCoefficient(proc)}
             };
         }
 

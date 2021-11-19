@@ -1,3 +1,5 @@
+package statTests.tables;
+
 import java.util.Map;
 
 /**
