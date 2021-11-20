@@ -64,6 +64,6 @@ public class KSTest {
             );
         }
 
-        return StatUtils.max(d);
+        return StatUtils.max(d) * Math.sqrt(len);
     }
 }
