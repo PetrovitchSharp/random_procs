@@ -27,9 +27,7 @@ public class Utils {
     public static double[] getLeftShiftedArray(double[] proc, int shift){
         var shiftedArray = new double[proc.length - shift];
 
-        for (var i = shift - 1; i<proc.length; i++){
-            shiftedArray[i - shift - 1] = proc[i];
-        }
+        if (proc.length - shift >= 0) System.arraycopy(proc, shift, shiftedArray, 0, proc.length - shift);
 
         return shiftedArray;
     }

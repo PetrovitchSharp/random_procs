@@ -4,10 +4,12 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import params.CorrelationFunction;
 
 import java.util.Arrays;
 
 import static math.Calculations.getCorrelation;
+import static math.Calculations.getTimeStep;
 import static math.Utils.getLeftShiftedArray;
 import static math.Utils.getRightShiftedArray;
 
@@ -53,18 +55,20 @@ public class DataFactory {
      * Подготовка набора данных для визуализации эмпирической корреляционной функции
      * @param proc СП
      * @param lenOfSeries Количество точек графика
+     * @param corrFunction Параметры КФ
      * @return Набор данных для визуализации эмпирической корреляционной функции
      */
-    public static XYSeriesCollection getCorrelationFunctionData(double[] proc, int lenOfSeries){
+    public static XYSeriesCollection getCorrelationFunctionData(double[] proc, int lenOfSeries, CorrelationFunction corrFunction){
         var series = new XYSeries("corr function");
         var shift = proc.length / (lenOfSeries - 1);
+        var timeStep = getTimeStep(corrFunction, lenOfSeries);
 
         for (var i = 0; i < proc.length; i+=shift){
             var ls = getLeftShiftedArray(proc, i);
             var rs = getRightShiftedArray(proc, i);
-            series.add(i, getCorrelation(ls, rs));
+            series.add(timeStep*i, getCorrelation(ls, rs));
         }
-        series.add(proc.length - 1, 0);
+        series.add(timeStep*(proc.length - 1), 0);
 
         return new XYSeriesCollection(series);
     }
