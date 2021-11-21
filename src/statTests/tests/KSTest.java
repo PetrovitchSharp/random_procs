@@ -27,17 +27,15 @@ public class KSTest {
         XYSeries subsample;
 
         if (typeOfGenerating == 0) {
-            subsample = getDistributionFunctionData(
+            subsample = getExperimentalDistributionFunctionData(
                     procSample,
-                    checkParams.getNumberOfDegreesOfFreedom())
-                    .getSeries(0);
+                    checkParams.getNumberOfDegreesOfFreedom());
         }
         else {
-            subsample = getCorrelationFunctionData(
+            subsample = getExperimentalCorrelationFunctionData(
                     procSample,
                     checkParams.getNumberOfDegreesOfFreedom(),
-                    randProc.getCorrelationFunction())
-                    .getSeries(0);
+                    randProc.getCorrelationFunction());
         }
 
 

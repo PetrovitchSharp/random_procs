@@ -30,7 +30,7 @@ public class ChartsFactory {
      */
     public static JFreeChart getExperimentalDistributionFunctionChart(double[] proc){
         var lenOfSeries = getNumOfDistFunctionSamples(proc.length);
-        var data = getDistributionFunctionData(proc, lenOfSeries);
+        var data = getExperimentalDistributionFunctionData(proc, lenOfSeries);
 
         return ChartFactory.createXYStepChart(
                 "Эмпирическая функция распределения",
@@ -47,7 +47,7 @@ public class ChartsFactory {
      */
     public static JFreeChart getExperimentalDensityFunctionHistogram(double[] proc){
         var numOfBins = getNumOfBins(proc.length);
-        var data = getDensityFunctionData(proc, numOfBins);
+        var data = getExperimentalDensityFunctionData(proc, numOfBins);
 
         return ChartFactory.createHistogram(
                 "Гистограмма распределения",
@@ -65,7 +65,7 @@ public class ChartsFactory {
      */
     public static JFreeChart getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
         var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.1);
-        var data = getCorrelationFunctionData(proc, lenOfSeries, corrFuncParams);
+        var data = getExperimentalCorrelationFunctionData(proc, lenOfSeries, corrFuncParams);
 
         return ChartFactory.createXYLineChart(
                 "Эмпирическая корреляционная функция",
@@ -96,7 +96,7 @@ public class ChartsFactory {
             func = new GaussianDistributionFunction(distFuncParams.getExpectedValue(), distFuncParams.getDispersion());
         }
 
-        var data = DatasetUtils.sampleFunction2D(func, min, max, 1000, "theoretical dist");
+        var data = getTheoreticalDistributionFunctionData(func, min, max, 1000);
 
         return ChartFactory.createXYLineChart(
                 "Теоретическая функция распределения",
@@ -127,7 +127,7 @@ public class ChartsFactory {
             func = new GaussianDensityFunction(distFuncParams.getExpectedValue(), distFuncParams.getDispersion());
         }
 
-        var data = DatasetUtils.sampleFunction2D(func, min, max, 1000, "theoretical dens");
+        var data = getTheoreticalDensityFunctionData(func, min, max, 1000);
 
         return ChartFactory.createXYLineChart(
                 "Теоретическая плотность распределения",
@@ -155,7 +155,7 @@ public class ChartsFactory {
             func = new OscillatingCorrelationFunction(corrFuncParams.getAttenuationRates(), corrFuncParams.getOscillationFrequencyValue());
         }
 
-        var data = DatasetUtils.sampleFunction2D(func, min, max, 1000, "theoretical corr");
+        var data = getTheoreticalCorrelationFunctionData(func, min, max, 1000);
 
         return ChartFactory.createXYLineChart(
                 "Теоретическая корреляционная функция",

@@ -1,9 +1,9 @@
 package charts;
 
+import org.jfree.data.function.Function2D;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
 import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import params.CorrelationFunction;
 
 import java.util.Arrays;
@@ -23,18 +23,18 @@ public class DataFactory {
      * @param lenOfSeries Количество точек графика
      * @return Набор данных для визуализации эмпирической функции распределения
      */
-    public static XYSeriesCollection getDistributionFunctionData(double[] proc, int lenOfSeries){
+    public static XYSeries getExperimentalDistributionFunctionData(double[] proc, int lenOfSeries){
         Arrays.sort(proc);
 
         var shift = proc.length / (lenOfSeries - 1);
 
-        var series = new XYSeries("dist function");
+        var series = new XYSeries("Эмпирическая функция распределения");
         for (var i = 0; i < proc.length; i+=shift){
             series.add(proc[i],(double) i/proc.length);
         }
         series.add(proc[proc.length-1],1);
 
-        return new XYSeriesCollection(series);
+        return series;
     }
 
     /**
@@ -43,9 +43,9 @@ public class DataFactory {
      * @param numOfBins Количество столбцов гистограммы
      * @return Набор данных для визуализации гистограммы распределения
      */
-    public static HistogramDataset getDensityFunctionData(double[] proc, int numOfBins){
+    public static HistogramDataset getExperimentalDensityFunctionData(double[] proc, int numOfBins){
         var hist = new HistogramDataset();
-        hist.addSeries("density", proc, numOfBins);
+        hist.addSeries("Эмпирическая плотность", proc, numOfBins);
         hist.setType(HistogramType.SCALE_AREA_TO_1);
 
         return hist;
@@ -58,8 +58,8 @@ public class DataFactory {
      * @param corrFunction Параметры КФ
      * @return Набор данных для визуализации эмпирической корреляционной функции
      */
-    public static XYSeriesCollection getCorrelationFunctionData(double[] proc, int lenOfSeries, CorrelationFunction corrFunction){
-        var series = new XYSeries("corr function");
+    public static XYSeries getExperimentalCorrelationFunctionData(double[] proc, int lenOfSeries, CorrelationFunction corrFunction){
+        var series = new XYSeries("Эмпирическая корреляционная функция");
         var shift = proc.length / (lenOfSeries - 1);
         var timeStep = getTimeStep(corrFunction, lenOfSeries);
 
@@ -70,6 +70,63 @@ public class DataFactory {
         }
         series.add(timeStep*(proc.length - 1), 0);
 
-        return new XYSeriesCollection(series);
+        return series;
+    }
+
+    /**
+     * Подготовка набора данных для визуализации эмпирической функции распределения
+     * @param realFunction Функция распределения
+     * @param min Минимальное значение СП
+     * @param max Максимальное значение СП
+     * @param numOfSamples Количество точек графика
+     * @return Набор данных для визуализации эмпирической функции распределения
+     */
+    public static XYSeries getTheoreticalDistributionFunctionData(Function2D realFunction, double min, double max, int numOfSamples){
+        var series = new XYSeries("Теоретическая функция распределения");
+        var shift = (max-min) / (numOfSamples - 1);
+        while (min <= max){
+            series.add(min, realFunction.getValue(min));
+            min+=shift;
+        }
+
+        return series;
+    }
+
+    /**
+     * Подготовка набора данных для визуализации эмпирической плотности
+     * @param realFunction Функция плотности
+     * @param min Минимальное значение СП
+     * @param max Максимальное значение СП
+     * @param numOfSamples Количество точек графика
+     * @return Набор данных для визуализации эмпирической плотности
+     */
+    public static XYSeries getTheoreticalDensityFunctionData(Function2D realFunction, double min, double max, int numOfSamples){
+        var series = new XYSeries("Теоретическая плотность");
+        var shift = (max-min) / (numOfSamples - 1);
+        while (min <= max){
+            series.add(min, realFunction.getValue(min));
+            min+=shift;
+        }
+
+        return series;
+    }
+
+    /**
+     * Подготовка набора данных для визуализации эмпирической корреляционной функции
+     * @param realFunction Корреляционная функция
+     * @param min Минимальное значение СП
+     * @param max Максимальное значение СП
+     * @param numOfSamples Количество точек графика
+     * @return Набор данных для визуализации эмпирической корреляционной функции
+     */
+    public static XYSeries getTheoreticalCorrelationFunctionData(Function2D realFunction, double min, double max, int numOfSamples){
+        var series = new XYSeries("Теоретическая корреляционная функция");
+        var shift = (max-min) / (numOfSamples - 1);
+        while (min <= max){
+            series.add(min, realFunction.getValue(min));
+            min+=shift;
+        }
+
+        return series;
     }
 }
