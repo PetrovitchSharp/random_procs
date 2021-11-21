@@ -1,4 +1,9 @@
+import charts.ChartsFactory;
 import math.Calculations;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeriesCollection;
 import params.CorrelationFunction;
 import params.DistributionLaw;
 import params.HypothesisCheck;
@@ -20,16 +25,14 @@ public class ViewSwing {
     private void begin(){
         jFrame = new JFrame("Генерация случайного процесса");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jFrame.setPreferredSize(new Dimension(800, 660));
+        jFrame.setPreferredSize(new Dimension(290, height));
 
         jPanel = new JPanel();
-        GridLayout gridLayout = new GridLayout(1,2,5,15);
-        jPanel.setLayout(gridLayout);
 
         getJpDataInput();
         getJpDataOutput();
 
-        jPanel.add(jpDataInput);
+        jPanel.add(jpDataInput,FlowLayout.LEFT);
         jPanel.add(jpDataOutput);
 
         jFrame.add(jPanel);
@@ -125,8 +128,13 @@ public class ViewSwing {
                     randomProcess.setNumberOfSamples(numberOfSamples.getText().isEmpty() ? null : Integer.parseInt(numberOfSamples.getText()));
 
                     proc =  RandomProcGenerator.generateRandomProc(randomProcess);
+                    jFrame.setSize(new Dimension(width,height));
+                    GridLayout gridLayout = new GridLayoutNew(1,2,5,15);
+                    jPanel.setLayout(gridLayout);
+
                     getTable();
-                    //TODO: вызов метода рассчета результата, вызов метода для вывода информации
+
+                    jFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
                 } catch (Exception exception){
                     JOptionPane.showMessageDialog(null,exception.getMessage());
                 }
@@ -339,11 +347,11 @@ public class ViewSwing {
                     } else if (kindDistributionLaw.getSelectedItem().toString().equals(sKindDistributionLaw[1])){
 
                         if (((JTextField)jpUniform.getComponent(1)).getText().isEmpty()
-                                && ((JTextField)jpUniform.getComponent(3)).getText().isEmpty())
+                                || ((JTextField)jpUniform.getComponent(3)).getText().isEmpty())
                             throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
 
                         if (Double.parseDouble(((JTextField)jpUniform.getComponent(1)).getText())
-                                > Double.parseDouble(((JTextField)jpUniform.getComponent(3)).getText()))
+                                < Double.parseDouble(((JTextField)jpUniform.getComponent(3)).getText()))
                             throw new Exception(ExceptionMessage.EXCEPTION_LEFT_IS_MORE_RIGHT);
 
                         distributionLaw.setRight(Double.parseDouble(((JTextField)jpUniform.getComponent(1)).getText()));
@@ -491,31 +499,52 @@ public class ViewSwing {
     /** Метод создания панели для вывода данных*/
     private void getJpDataOutput(){
         jpDataOutput = new JPanel();
-        jpDataOutput.setPreferredSize(new Dimension(width - jpDataInput.getWidth(), height));
+        jpDataOutput.setPreferredSize(new Dimension(width - 290, 660));
 
         GridLayout gridLayout = new GridLayout(2,2,5,15);
         jpDataOutput.setLayout(gridLayout);
 
+        getJpNumeralCharacteristics();
+        getJpOutput();
+
+        jpDataOutput.add(jpNumericalCharacteristics);
+        jpDataOutput.add(jpDistributionFunction);
+        jpDataOutput.add(jpProbabilityDensity);
+        jpDataOutput.add(jpCorrelationFunctionOutput);
+        jpDataOutput.setVisible(false);
+    }
+
+    /** Метод создания панели c таблицей*/
+    private void getJpNumeralCharacteristics(){
         jpNumericalCharacteristics = new JPanel();
         jpNumericalCharacteristics.setBorder(BorderFactory.createTitledBorder(etched, "Числовые характеристики"));
 
-        //Массив содержащий заголоки таблицы
-        Object[] headers = new String[]{"Момент", "Теоретическое значение", "Эмпирическое значение"};
-
         DefaultTableModel model = new DefaultTableModel();
-        model.setColumnIdentifiers(headers);
 
         jtNumericalCharacteristic = new JTable(model);
         jtNumericalCharacteristic.setFillsViewportHeight(true);
 
         //Создаем панель прокрутки и включаем в ее состав нашу таблицу
         JScrollPane jscrlp = new JScrollPane(jtNumericalCharacteristic);
-        jscrlp.setPreferredSize(new Dimension(350,100));
+        jscrlp.setPreferredSize(new Dimension(300,100));
 
         jpNumericalCharacteristics.add(jscrlp);
+        jpNumericalCharacteristics.setBackground(color);
+    }
 
-        jpDataOutput.add(jpNumericalCharacteristics);
-        jpDataOutput.setVisible(false);
+    private void getJpOutput(){
+        jpDistributionFunction = new JPanel();
+        jpDistributionFunction.setBorder(BorderFactory.createTitledBorder(etched));
+        jpDistributionFunction.setBackground(color);
+
+        jpProbabilityDensity = new JPanel();
+        jpProbabilityDensity.setBorder(BorderFactory.createTitledBorder(etched));
+        jpProbabilityDensity.setBackground(color);
+
+        jpCorrelationFunctionOutput = new JPanel();
+        jpCorrelationFunctionOutput.setBorder(BorderFactory.createTitledBorder(etched));
+        jpCorrelationFunctionOutput.setBackground(color);
+
     }
 
     /** Метод создания панели для получения таблицы*/
@@ -545,9 +574,51 @@ public class ViewSwing {
         DefaultTableModel modelNew = (DefaultTableModel)jtNumericalCharacteristic.getModel();
         modelNew.setDataVector(data,headers);
 
+        XYSeriesCollection collectForDistributionLaw = new XYSeriesCollection();
+        collectForDistributionLaw.addSeries(ChartsFactory.getExperimentalDistributionFunctionChart(proc));
+        if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")){
+            collectForDistributionLaw.addSeries(ChartsFactory.getTheoreticalDistributionFunctionChart(distributionLaw,proc));
+        }
+        jpDistributionFunction.add(getChartPanel(ChartFactory.createXYStepChart(
+                "Функция распределения",
+                "Значение случ. величины",
+                "F(x)",
+                collectForDistributionLaw
+        )));
+
+        jpProbabilityDensity.add(getChartPanel(ChartsFactory.getExperimentalDensityFunctionHistogram(proc)));
+
+        XYSeriesCollection collectCorFunc = new XYSeriesCollection();
+        if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
+            //collectCorFunc.addSeries(ChartsFactory.getExperimentalCorrelationFunctionChart(proc,correlationFunction));
+            collectCorFunc.addSeries(ChartsFactory.getTheoreticalCorrelationFunctionChart(correlationFunction,proc));
+
+            jpCorrelationFunctionOutput.add(getChartPanel(ChartFactory.createXYLineChart(
+                    "Корреляционная функция",
+                    "Сдвиг СП",
+                    "Коэф. автокорр.",
+                    collectCorFunc
+            )));
+        } else{
+            collectCorFunc.addSeries(ChartsFactory.getTheoreticalDensityFunctionChart(distributionLaw,proc));
+            jpCorrelationFunctionOutput.add(getChartPanel(ChartFactory.createXYLineChart(
+                    "Теоретическая плотность распределения",
+                    "Значение случ. величины",
+                    "Частота",
+                    collectCorFunc
+            )));
+        }
+
         jpDataOutput.setVisible(true);
     }
 
+    private ChartPanel getChartPanel(JFreeChart jFreeChart){
+        return new ChartPanel(jFreeChart) {
+            public Dimension getPreferredSize() {
+                return new Dimension(305, 280);
+            }
+        };
+    }
 
     public static void main(String[] args) {
         new ViewSwing();
@@ -567,6 +638,9 @@ public class ViewSwing {
     private static JPanel jpCorrelationFunction;
     /**поле панели закона распределения*/
     private static JPanel jpDistributionLaw;
+    private static JPanel jpDistributionFunction;
+    private static JPanel jpProbabilityDensity;
+    private static JPanel jpCorrelationFunctionOutput;
     /**поле генерации процесса*/
     private static RandomProcess randomProcess;
     /**поле корреляционной функции*/
@@ -588,9 +662,28 @@ public class ViewSwing {
     /**поле размера для комбобокс*/
     private static final Dimension dimensionForJCombobox = new Dimension(221,25);
     /**поле ширины для фрейма*/
-    private static final int width = 800;
+    private static final int width = 1000;
     /**поле высоты для фрейма*/
     private static final int height = 660;
 
+    private class GridLayoutNew extends GridLayout{
+        public GridLayoutNew(int rows, int cols, int hgap, int vgap) {
+            super(rows,cols,hgap,vgap);
+        }
+
+        @Override
+        public void layoutContainer(Container parent) {
+            synchronized (parent.getTreeLock()) {
+                for (int i = 0; i < parent.getComponentCount(); i++) {
+                    // Определение предпочтительного размера компонента
+                    Dimension pref = parent.getComponent(i).getPreferredSize();
+                    // Размещение компонента на экране
+                    parent.getComponent(i).setBounds(290*i, 0, pref.width-10, pref.height-10);
+
+                }
+
+            }
+        }
+    }
 }
 

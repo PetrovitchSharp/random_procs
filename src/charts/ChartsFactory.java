@@ -13,6 +13,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.function.Function2D;
 import org.jfree.data.general.DatasetUtils;
+import org.jfree.data.xy.XYSeries;
 import params.CorrelationFunction;
 import params.DistributionLaw;
 
@@ -28,16 +29,9 @@ public class ChartsFactory {
      * @param proc СП
      * @return График эмпирической функции распределения
      */
-    public static JFreeChart getExperimentalDistributionFunctionChart(double[] proc){
+    public static XYSeries getExperimentalDistributionFunctionChart(double[] proc){
         var lenOfSeries = getNumOfDistFunctionSamples(proc.length);
-        var data = getExperimentalDistributionFunctionData(proc, lenOfSeries);
-
-        return ChartFactory.createXYStepChart(
-                "Эмпирическая функция распределения",
-                "Значение случ. величины",
-                "F(x)",
-                data
-        );
+        return getExperimentalDistributionFunctionData(proc, lenOfSeries);
     }
 
     /**
@@ -63,16 +57,9 @@ public class ChartsFactory {
      * @param corrFuncParams Параметры КФ
      * @return График эмпирической КФ
      */
-    public static JFreeChart getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
+    public static XYSeries getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
         var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.1);
-        var data = getExperimentalCorrelationFunctionData(proc, lenOfSeries, corrFuncParams);
-
-        return ChartFactory.createXYLineChart(
-                "Эмпирическая корреляционная функция",
-                "Сдвиг СП",
-                "Коэффициент автокорреляции",
-                data
-        );
+        return getExperimentalCorrelationFunctionData(proc, lenOfSeries, corrFuncParams);
     }
 
     /**
@@ -81,7 +68,7 @@ public class ChartsFactory {
      * @param proc СП
      * @return График теоретической функции распределения
      */
-    public static JFreeChart getTheoreticalDistributionFunctionChart(DistributionLaw distFuncParams, double[] proc){
+    public static XYSeries getTheoreticalDistributionFunctionChart(DistributionLaw distFuncParams, double[] proc){
         Function2D func = null;
         var min = StatUtils.min(proc);
         var max = StatUtils.max(proc);
@@ -96,14 +83,7 @@ public class ChartsFactory {
             func = new GaussianDistributionFunction(distFuncParams.getExpectedValue(), distFuncParams.getDispersion());
         }
 
-        var data = getTheoreticalDistributionFunctionData(func, min, max, 1000);
-
-        return ChartFactory.createXYLineChart(
-                "Теоретическая функция распределения",
-                "Значение случ. величины",
-                "F(x)",
-                data
-        );
+        return getTheoreticalDistributionFunctionData(func, min, max, 1000);
     }
 
     /**
@@ -112,7 +92,7 @@ public class ChartsFactory {
      * @param proc СП
      * @return График теоретической плотности вероятности
      */
-    public static JFreeChart getTheoreticalDensityFunctionChart(DistributionLaw distFuncParams, double[] proc){
+    public static XYSeries getTheoreticalDensityFunctionChart(DistributionLaw distFuncParams, double[] proc){
         Function2D func = null;
         var min = StatUtils.min(proc);
         var max = StatUtils.max(proc);
@@ -127,14 +107,7 @@ public class ChartsFactory {
             func = new GaussianDensityFunction(distFuncParams.getExpectedValue(), distFuncParams.getDispersion());
         }
 
-        var data = getTheoreticalDensityFunctionData(func, min, max, 1000);
-
-        return ChartFactory.createXYLineChart(
-                "Теоретическая плотность распределения",
-                "Значение случ. величины",
-                "Частота",
-                data
-        );
+        return getTheoreticalDensityFunctionData(func, min, max, 1000);
     }
 
     /**
@@ -143,7 +116,7 @@ public class ChartsFactory {
      * @param proc СП
      * @return График теоретической КФ
      */
-    public static JFreeChart getTheoreticalCorrelationFunctionChart(CorrelationFunction corrFuncParams, double[] proc){
+    public static XYSeries getTheoreticalCorrelationFunctionChart(CorrelationFunction corrFuncParams, double[] proc){
         Function2D func = null;
         var min = StatUtils.min(proc);
         var max = StatUtils.max(proc);
@@ -155,14 +128,7 @@ public class ChartsFactory {
             func = new OscillatingCorrelationFunction(corrFuncParams.getAttenuationRates(), corrFuncParams.getOscillationFrequencyValue());
         }
 
-        var data = getTheoreticalCorrelationFunctionData(func, min, max, 1000);
-
-        return ChartFactory.createXYLineChart(
-                "Теоретическая корреляционная функция",
-                "Сдвиг СП",
-                "Коэффициент автокорреляции",
-                data
-        );
+        return getTheoreticalCorrelationFunctionData(func,corrFuncParams, 1000);
     }
 
     /**
