@@ -114,17 +114,18 @@ public class DataFactory {
     /**
      * Подготовка набора данных для визуализации эмпирической корреляционной функции
      * @param realFunction Корреляционная функция
-     * @param min Минимальное значение СП
-     * @param max Максимальное значение СП
+     * @param corrFunction Параметры КФ
      * @param numOfSamples Количество точек графика
      * @return Набор данных для визуализации эмпирической корреляционной функции
      */
-    public static XYSeries getTheoreticalCorrelationFunctionData(Function2D realFunction, double min, double max, int numOfSamples){
+    public static XYSeries getTheoreticalCorrelationFunctionData(Function2D realFunction, CorrelationFunction corrFunction, int numOfSamples){
         var series = new XYSeries("Теоретическая корреляционная функция");
-        var shift = (max-min) / (numOfSamples - 1);
-        while (min <= max){
-            series.add(min, realFunction.getValue(min));
-            min+=shift;
+        var timeStep = getTimeStep(corrFunction, numOfSamples);
+        var i = 0;
+
+        while (i < numOfSamples){
+            series.add(timeStep*i, realFunction.getValue(timeStep*i));
+            i++;
         }
 
         return series;
