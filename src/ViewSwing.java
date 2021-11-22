@@ -606,40 +606,49 @@ public class ViewSwing {
 
         jTPDistributionFunction = new JTabbedPane();
         jTPDistributionFunction.setBackground(color);
-        jTPDistributionFunction.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalDistributionFunctionChart(proc),
-                "Функция распределения",
-                "Значение случ. величины",
-                "F(x)"));
+        jTPDistributionFunction.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalDistributionFunctionChart_1(proc)));
         if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")){
-            jTPDistributionFunction.add("теоретическая", getChartPanel(ChartsFactory.getTheoreticalDistributionFunctionChart(distributionLaw,proc),
-                    "Функция распределения",
+            jTPDistributionFunction.add("теоретическая", getLineChartPanel(ChartsFactory.getTheoreticalDistributionFunctionChart(distributionLaw,proc),
+                    "Теоретическая функция распределения",
                     "Значение случ. величины",
-                    "F(x)"));
+                    "F(x)"
+            ));
         }
         jpDistributionFunction.add(jTPDistributionFunction);
 
-        jpProbabilityDensity.add(getChartPanel(ChartsFactory.getExperimentalDensityFunctionHistogram(proc)));
-
-        if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
-            jTPCorrFunc = new JTabbedPane();
-            jTPCorrFunc.setBackground(color);
-            jTPCorrFunc.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalCorrelationFunctionChart_1(proc,correlationFunction),
-                    "Корреляционная функция",
-                    "Лаг КФ",
-                    "Коэф. автокорр."));
-            jTPCorrFunc.add("теоретическая",getChartPanel(ChartsFactory.getTheoreticalCorrelationFunctionChart(proc,correlationFunction),
-                    "Корреляционная функция",
-                    "Лаг КФ",
-                    "Коэф. автокорр."));
-
-            jpCorrelationFunctionOutput.add(jTPCorrFunc);
-        } else{
-            jpCorrelationFunctionOutput.add(getChartPanel(ChartsFactory.getTheoreticalDensityFunctionChart(distributionLaw,proc),
+        jTPDensity = new JTabbedPane();
+        jTPDensity.setBackground(color);
+        jTPDensity.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalDensityFunctionHistogram(proc)));
+        if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")){
+            jTPDensity.add("теоретическая", getLineChartPanel(ChartsFactory.getTheoreticalDensityFunctionChart(distributionLaw,proc),
                     "Теоретическая плотность распределения",
                     "Значение случ. величины",
                     "Частота"
             ));
         }
+        jpProbabilityDensity.add(jTPDensity);
+
+        jTPCorrFunc = new JTabbedPane();
+        jTPCorrFunc.setBackground(color);
+        if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
+            jTPCorrFunc.add("эмпирическая", getLineChartPanel(ChartsFactory.getExperimentalCorrelationFunctionChart_1(proc,correlationFunction),
+                    "Эмпирическая корреляционная функция",
+                    "Лаг КФ",
+                    "Коэф. автокорр."
+            ));
+            jTPCorrFunc.add("теоретическая",getLineChartPanel(ChartsFactory.getTheoreticalCorrelationFunctionChart(proc,correlationFunction),
+                    "Теоретическая корреляционная функция",
+                    "Лаг КФ",
+                    "Коэф. автокорр."
+            ));
+        } else{
+            jpCorrelationFunctionOutput.add(getLineChartPanel(ChartsFactory.getExperimentalCorrelationFunctionChart(proc),
+                    "Эмпирическая корреляционная функция",
+                    "Лаг КФ",
+                    "Коэф. автокорр."
+            ));
+        }
+        jpCorrelationFunctionOutput.add(jTPCorrFunc);
 
         jpDataOutput.setVisible(true);
     }
@@ -668,10 +677,21 @@ public class ViewSwing {
         };
     }
 
-    private ChartPanel getChartPanel(XYSeries xySeries, String tittle, String X, String Y){
+    private ChartPanel getStepChartPanel(XYSeries xySeries, String tittle, String X, String Y){
         XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
         xySeriesCollection.addSeries(xySeries);
         return getChartPanel(ChartFactory.createXYStepChart(
+                tittle,
+                X,
+                Y,
+                xySeriesCollection
+        ));
+    }
+
+    private ChartPanel getLineChartPanel(XYSeries xySeries, String tittle, String X, String Y){
+        XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        xySeriesCollection.addSeries(xySeries);
+        return getChartPanel(ChartFactory.createXYLineChart(
                 tittle,
                 X,
                 Y,
@@ -702,6 +722,7 @@ public class ViewSwing {
     private static JPanel jpCorrelationFunctionOutput;
     private static JTabbedPane jTPDistributionFunction;
     private static JTabbedPane jTPCorrFunc;
+    private static JTabbedPane jTPDensity;
     private static JRadioButton rbCorrelationFunction;
     private static JRadioButton rbDistributionLaw;
     private static Boolean generateCF = false;

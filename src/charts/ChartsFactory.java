@@ -11,8 +11,12 @@ import distributionFunctions.UniformDistibutionFunction;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.data.function.Function2D;
 import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import params.CorrelationFunction;
 import params.DistributionLaw;
 
@@ -31,6 +35,22 @@ public class ChartsFactory {
     public static XYSeries getExperimentalDistributionFunctionChart(double[] proc){
         var lenOfSeries = getNumOfDistFunctionSamples(proc.length);
         return getExperimentalDistributionFunctionData(proc, lenOfSeries);
+    }
+
+    public static JFreeChart getExperimentalDistributionFunctionChart_1(double[] proc){
+        XYStepRenderer renderer = new XYStepRenderer();
+        var lenOfSeries = getNumOfDistFunctionSamples(proc.length);
+        var dataset = getExperimentalDistributionFunctionData(proc, lenOfSeries);
+        var collection = new XYSeriesCollection();
+        collection.addSeries(dataset);
+        var x_axis = new NumberAxis();
+        x_axis.setRange(StatUtils.min(proc),StatUtils.max(proc));
+        var y_axis = new NumberAxis();
+        y_axis.setRange(0,1);
+        XYPlot plot = new XYPlot(collection, x_axis,y_axis, renderer);
+        plot.setRenderer(renderer);
+
+        return new JFreeChart(plot);
     }
 
     /**
