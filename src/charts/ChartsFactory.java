@@ -53,12 +53,11 @@ public class ChartsFactory {
     /**
      * Создание объекта-графика для эмпирической корреляционной функции
      * @param proc СП
-     * @param corrFuncParams Параметры КФ
      * @return График эмпирической КФ
      */
-    public static XYSeries getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
-        var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.01);
-        return getExperimentalCorrelationFunctionData(proc, lenOfSeries, corrFuncParams);
+    public static XYSeries getExperimentalCorrelationFunctionChart(double[] proc){
+        var lenOfSeries = 30;
+        return getExperimentalCorrelationFunctionData(proc, lenOfSeries);
     }
 
     /**

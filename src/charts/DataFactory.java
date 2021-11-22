@@ -55,20 +55,18 @@ public class DataFactory {
      * Подготовка набора данных для визуализации эмпирической корреляционной функции
      * @param proc СП
      * @param lenOfSeries Количество точек графика
-     * @param corrFunction Параметры КФ
      * @return Набор данных для визуализации эмпирической корреляционной функции
      */
-    public static XYSeries getExperimentalCorrelationFunctionData(double[] proc, int lenOfSeries, CorrelationFunction corrFunction){
+    public static XYSeries getExperimentalCorrelationFunctionData(double[] proc, int lenOfSeries){
         var series = new XYSeries("Эмпирическая корреляционная функция");
         var shift = proc.length / (lenOfSeries - 1);
-        var timeStep = getTimeStep(corrFunction, proc.length);
 
         for (var i = 0; i < proc.length; i+=shift){
             var ls = getLeftShiftedArray(proc, i);
             var rs = getRightShiftedArray(proc, i);
-            series.add(timeStep*i, getCorrelation(ls, rs, proc));
+            series.add(i, getCorrelation(ls, rs, proc));
         }
-        series.add(timeStep*(proc.length - 1), 0);
+        series.add((proc.length - 1), 0);
 
         return series;
     }
@@ -88,9 +86,9 @@ public class DataFactory {
 
         for (var i = 0; i < proc.length; i+=shift){
             var eps = (2*rnd.nextDouble()-1)*func.getValue(timeStep*i)/8;
-            series.add(timeStep*i, func.getValue(timeStep*i)+eps);
+            series.add(i, func.getValue(timeStep*i)+eps);
         }
-        series.add(timeStep*(proc.length - 1), 0);
+        series.add((proc.length - 1), 0);
 
         return series;
     }
@@ -146,7 +144,7 @@ public class DataFactory {
         var i = 0;
 
         while (i < numOfSamples){
-            series.add(timeStep*i, realFunction.getValue(timeStep*i));
+            series.add(i, realFunction.getValue(timeStep*i));
             i++;
         }
 

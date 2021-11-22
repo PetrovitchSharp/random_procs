@@ -1,5 +1,4 @@
 import charts.ChartsFactory;
-import distributionFunctions.UniformDistibutionFunction;
 import math.Calculations;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -10,14 +9,15 @@ import params.CorrelationFunction;
 import params.DistributionLaw;
 import params.HypothesisCheck;
 import params.RandomProcess;
-import statTests.tests.Chi2Test;
-import statTests.tests.KSTest;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 public class ViewSwing {
 
@@ -123,21 +123,8 @@ public class ViewSwing {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    if (numberOfSamples.getText().isEmpty())
-                        throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
-                    if (!generateCF || !generateDL)
+                    if (!generateCF && !generateDL)
                         throw  new Exception(ExceptionMessage.EXCEPTION_NOT_GENERATE_RP);
-                    correlationFunction = new CorrelationFunction();
-                    distributionLaw = new DistributionLaw();
-
-                    randomProcess.setCorrelationFunction(rbCorrelationFunction.isSelected() ? correlationFunction : null);
-                    randomProcess.setDistributionLaw(rbDistributionLaw.isSelected() ? distributionLaw : null);
-                    randomProcess.setHypothesisCheck(hypothesisCheck);
-                    randomProcess.setWaysOfGeneration(rbDistributionLaw.isSelected() ? sWaysOfGeneration[1] : sWaysOfGeneration[0]);
-                    randomProcess.setNumberOfSamples(numberOfSamples.getText().isEmpty() ? null : Integer.parseInt(numberOfSamples.getText()));
-
-                    proc =  RandomProcGenerator.generateRandomProc(randomProcess);
-
                     clean();
                     getTable();
 
@@ -638,11 +625,11 @@ public class ViewSwing {
             jTPCorrFunc.setBackground(color);
             jTPCorrFunc.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalCorrelationFunctionChart_1(proc,correlationFunction),
                     "Корреляционная функция",
-                    "Время \"жизни\" СП",
+                    "Лаг КФ",
                     "Коэф. автокорр."));
             jTPCorrFunc.add("теоретическая",getChartPanel(ChartsFactory.getTheoreticalCorrelationFunctionChart(proc,correlationFunction),
                     "Корреляционная функция",
-                    "Время \"жизни\" СП",
+                    "Лаг КФ",
                     "Коэф. автокорр."));
 
             jpCorrelationFunctionOutput.add(jTPCorrFunc);
