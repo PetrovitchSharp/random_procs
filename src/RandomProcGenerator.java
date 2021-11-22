@@ -1,8 +1,9 @@
 import params.RandomProcess;
 
+import java.util.Date;
 import java.util.Random;
 
-import static math.Calculations.*;
+import static math.Calculations.getTimeStep;
 
 /**
  * Методы генерации СП
@@ -155,6 +156,7 @@ public class RandomProcGenerator {
     private static double[] getMonotonousCorrFunction(int numOfSamples, double attenuationRate, double delta){
         var sample = new double[numOfSamples];
         var rnd = new Random();
+        rnd.setSeed(new Date().getTime());
 
         var gamma = attenuationRate * delta;
         var p = Math.exp(-gamma);
@@ -162,10 +164,10 @@ public class RandomProcGenerator {
         var b = Math.exp(-gamma);
         var a = Math.sqrt(1-Math.pow(p,2));
 
-        sample[0] = a*rnd.nextDouble();
+        sample[0] = a*(2*rnd.nextDouble()-1);
 
         for (var i = 1; i < numOfSamples; i++) {
-            sample[i] = a*rnd.nextDouble() + b*sample[i-1];
+            sample[i] = a*(2*rnd.nextDouble()-1) + b*sample[i-1];
         }
 
         return sample;
@@ -181,7 +183,7 @@ public class RandomProcGenerator {
      */
     private static double[] getOscillatoryCorrFunction(int numOfSamples, double attenuationRate, double oscillationFrequency, double delta){
         var sample = new double[numOfSamples];
-        var rnd = new Random();
+        var rnd = new Random(new Date().getTime());
         double x_prev, x_curr;
 
         var gamma = attenuationRate * delta;
@@ -191,23 +193,28 @@ public class RandomProcGenerator {
         var alpha_1 = 1 - Math.pow(p,4);
 
         var sub =  Math.sqrt(Math.pow(alpha_1,2)-4*Math.pow(alpha_0,2));
+        var pw = Math.pow(alpha_1,2);
         var sgn = (Math.pow(alpha_1,2) > sub)?1:-1;
 
-        var a_0 = Math.sqrt((Math.pow(alpha_1,2) + sgn*sub)/2);
+        var a_0 = Math.sqrt((Math.pow(alpha_1,2) - sgn*sub)/2);
         var a_1 = alpha_0/alpha_1;
         var b_1 = 2*p*Math.cos(gamma_0);
         var b_2 = -Math.pow(p,2);
 
-        x_prev = rnd.nextDouble();
+        x_prev = (2*rnd.nextDouble()-1);
         sample[0] = x_prev = a_0*x_prev;
-        x_curr = rnd.nextDouble();
+        x_curr = (2*rnd.nextDouble()-1);
         sample[1] = a_0*x_curr + x_prev*a_1 + b_1*sample[0];
         x_prev = x_curr;
 
         for (var i = 2; i < numOfSamples; i++) {
-            x_curr = rnd.nextDouble();
+            x_curr = (2*rnd.nextDouble()-1);
             sample[i] = x_curr*a_0 + x_prev*a_1 + b_1*sample[i-1] + b_2*sample[i-2];
             x_prev = x_curr;
+        }
+
+        for (var i = 0; i < numOfSamples; i++) {
+            sample[i] /= (1./3);
         }
 
         return sample;

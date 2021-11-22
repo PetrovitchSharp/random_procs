@@ -140,24 +140,25 @@ public class Calculations {
      * Расчет автокорреляции СП в заданной точке
      * @param originalProcess Обрезанный СП
      * @param shiftedProcess Сдвинутый СП
+     * @param proc СП
      * @return Коэффициент автокорреляции
      */
-    public static double getCorrelation(double[] originalProcess, double[] shiftedProcess){
-        var originalMean = getMean(originalProcess);
-        var shiftedMean = getMean(shiftedProcess);
+    public static double getCorrelation(double[] originalProcess, double[] shiftedProcess, double[] proc){
         var len = originalProcess.length;
 
         var sumOfShifts = 0.;
-        var originalSumOfSquaredDeviations = 0.;
-        var shiftedSumOfSquaredDeviations = 0.;
+        var sumOfSquaredDeviations = 0.;
 
-        for (var i = 0; i < len; i++){
-            sumOfShifts += (originalProcess[i] - originalMean)*(shiftedProcess[i] - shiftedMean);
-            originalSumOfSquaredDeviations += Math.pow((originalProcess[i] - originalMean),2);
-            shiftedSumOfSquaredDeviations += Math.pow((shiftedProcess[i] - shiftedMean), 2);
+        var mean = getMean(proc);
+        for (var pr:proc) {
+            sumOfSquaredDeviations += Math.pow(pr - mean,2);
         }
 
-        return sumOfShifts / Math.sqrt(originalSumOfSquaredDeviations) / Math.sqrt(shiftedSumOfSquaredDeviations);
+        for (var i = 0; i < len; i++){
+            sumOfShifts += (originalProcess[i] - mean)*(shiftedProcess[i] - mean);
+        }
+
+        return sumOfShifts / sumOfSquaredDeviations;
     }
 
     /**
@@ -199,20 +200,7 @@ public class Calculations {
      * @return Сдвиг для КФ
      */
     public static double getTimeStep(CorrelationFunction corrFunction, int numOfSamples){
-        double tau, tauMax;
-        if (corrFunction.getKindCorrelationFunction().equals("Монотонная")){
-            var alpha = corrFunction.getAttenuationRates();
-            tau = 1. / alpha;
-            tauMax = 3*tau;
-        }
-        else{
-            var alpha = corrFunction.getAttenuationRates();
-            var omega = corrFunction.getOscillationFrequencyValue();
-            var mu = omega / alpha;
-
-            tau = alpha / (Math.pow(alpha,2) + Math.pow(omega,2));
-            tauMax = 3 * (1 + Math.pow(mu,2)) * tau;
-        }
+        var tauMax = 4.61/corrFunction.getAttenuationRates();
         return tauMax / numOfSamples;
     }
 }

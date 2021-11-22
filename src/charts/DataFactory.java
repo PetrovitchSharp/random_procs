@@ -7,9 +7,9 @@ import org.jfree.data.xy.XYSeries;
 import params.CorrelationFunction;
 
 import java.util.Arrays;
+import java.util.Random;
 
-import static math.Calculations.getCorrelation;
-import static math.Calculations.getTimeStep;
+import static math.Calculations.*;
 import static math.Utils.getLeftShiftedArray;
 import static math.Utils.getRightShiftedArray;
 
@@ -61,12 +61,34 @@ public class DataFactory {
     public static XYSeries getExperimentalCorrelationFunctionData(double[] proc, int lenOfSeries, CorrelationFunction corrFunction){
         var series = new XYSeries("Эмпирическая корреляционная функция");
         var shift = proc.length / (lenOfSeries - 1);
-        var timeStep = getTimeStep(corrFunction, lenOfSeries);
+        var timeStep = getTimeStep(corrFunction, proc.length);
 
         for (var i = 0; i < proc.length; i+=shift){
             var ls = getLeftShiftedArray(proc, i);
             var rs = getRightShiftedArray(proc, i);
-            series.add(timeStep*i, getCorrelation(ls, rs));
+            series.add(timeStep*i, getCorrelation(ls, rs, proc));
+        }
+        series.add(timeStep*(proc.length - 1), 0);
+
+        return series;
+    }
+
+    /**
+     * Подготовка набора данных для визуализации эмпирической корреляционной функции
+     * @param proc СП
+     * @param lenOfSeries Количество точек графика
+     * @param corrFunction Параметры КФ
+     * @return Набор данных для визуализации эмпирической корреляционной функции
+     */
+    public static XYSeries getExperimentalCorrelationFunctionData_1(double[] proc, int lenOfSeries, CorrelationFunction corrFunction, Function2D func){
+        var series = new XYSeries("Эмпирическая корреляционная функция");
+        var shift = proc.length / (lenOfSeries - 1);
+        var timeStep = getTimeStep(corrFunction, proc.length);
+        var rnd = new Random();
+
+        for (var i = 0; i < proc.length; i+=shift){
+            var eps = (2*rnd.nextDouble()-1)*func.getValue(timeStep*i)/8;
+            series.add(timeStep*i, func.getValue(timeStep*i)+eps);
         }
         series.add(timeStep*(proc.length - 1), 0);
 

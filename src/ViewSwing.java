@@ -590,12 +590,12 @@ public class ViewSwing {
 
         XYSeriesCollection collectCorFunc = new XYSeriesCollection();
         if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
-            //collectCorFunc.addSeries(ChartsFactory.getExperimentalCorrelationFunctionChart(proc,correlationFunction));
+            collectCorFunc.addSeries(ChartsFactory.getExperimentalCorrelationFunctionChart_1(proc,correlationFunction));
             collectCorFunc.addSeries(ChartsFactory.getTheoreticalCorrelationFunctionChart(correlationFunction,proc));
 
             jpCorrelationFunctionOutput.add(getChartPanel(ChartFactory.createXYLineChart(
                     "Корреляционная функция",
-                    "Сдвиг СП",
+                    "Время \"жизни\" СП",
                     "Коэф. автокорр.",
                     collectCorFunc
             )));

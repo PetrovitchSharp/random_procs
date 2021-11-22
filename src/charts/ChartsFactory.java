@@ -12,7 +12,6 @@ import org.apache.commons.math3.stat.StatUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.function.Function2D;
-import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYSeries;
 import params.CorrelationFunction;
 import params.DistributionLaw;
@@ -58,8 +57,25 @@ public class ChartsFactory {
      * @return График эмпирической КФ
      */
     public static XYSeries getExperimentalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
-        var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.1);
+        var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.01);
         return getExperimentalCorrelationFunctionData(proc, lenOfSeries, corrFuncParams);
+    }
+
+    /**
+     * Создание объекта-графика для эмпирической корреляционной функции
+     * @param proc СП
+     * @param corrFuncParams Параметры КФ
+     * @return График эмпирической КФ
+     */
+    public static XYSeries getExperimentalCorrelationFunctionChart_1(double[] proc, CorrelationFunction corrFuncParams){
+        var lenOfSeries = getNumOfCorrFunctionSamples(corrFuncParams, proc.length, 0.01);
+        Function2D func = null;
+        if (corrFuncParams.getKindCorrelationFunction().equals("Монотонная")){
+            func = new MonotoneCorrelationFunction(corrFuncParams.getAttenuationRates());
+        }else {
+            func = new OscillatingCorrelationFunction(corrFuncParams.getAttenuationRates(),corrFuncParams.getOscillationFrequencyValue());
+        }
+        return getExperimentalCorrelationFunctionData_1(proc, lenOfSeries, corrFuncParams, func);
     }
 
     /**
@@ -146,7 +162,8 @@ public class ChartsFactory {
      * @return Количество отсчетов для графика функции распределения
      */
     private static int getNumOfDistFunctionSamples(int numOfSamples){
-        return (int)Math.round(Math.exp(1)*Math.log(numOfSamples));
+        //return (int)Math.round(Math.exp(2)*Math.log(numOfSamples));
+        return 25;
     }
 
     /**
@@ -157,6 +174,12 @@ public class ChartsFactory {
      * @return Количество отсчетов для графика КФ
      */
     private static int getNumOfCorrFunctionSamples(CorrelationFunction corrFunc, int numOfSamples, double eps){
-        return (int)Math.round(numOfSamples / getTimeStep(corrFunc, numOfSamples) * numOfSamples / eps);
+        var T = getTimeStep(corrFunc, numOfSamples) * numOfSamples;
+        var N1 = (int)Math.round(T/eps);
+        var in = (int)Math.ceil((double) numOfSamples / N1);
+
+
+        //return in+1;
+        return 30;
     }
 }
