@@ -32,10 +32,11 @@ public class KSTest {
                     checkParams.getNumberOfDegreesOfFreedom());
         }
         else {
-            subsample = getExperimentalCorrelationFunctionData(
+            subsample = getExperimentalCorrelationFunctionData_1(
                     procSample,
                     checkParams.getNumberOfDegreesOfFreedom(),
-                    randProc.getCorrelationFunction());
+                    randProc.getCorrelationFunction(),
+                    realFunction);
         }
 
 

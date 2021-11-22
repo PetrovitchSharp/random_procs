@@ -132,7 +132,7 @@ public class ChartsFactory {
      * @param proc СП
      * @return График теоретической КФ
      */
-    public static XYSeries getTheoreticalCorrelationFunctionChart(CorrelationFunction corrFuncParams, double[] proc){
+    public static XYSeries getTheoreticalCorrelationFunctionChart(double[] proc, CorrelationFunction corrFuncParams){
         Function2D func = null;
         var min = StatUtils.min(proc);
         var max = StatUtils.max(proc);

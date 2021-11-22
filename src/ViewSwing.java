@@ -1,13 +1,17 @@
 import charts.ChartsFactory;
+import distributionFunctions.UniformDistibutionFunction;
 import math.Calculations;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import params.CorrelationFunction;
 import params.DistributionLaw;
 import params.HypothesisCheck;
 import params.RandomProcess;
+import statTests.tests.Chi2Test;
+import statTests.tests.KSTest;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -48,7 +52,7 @@ public class ViewSwing {
         jpDataInput.setBorder(BorderFactory.createTitledBorder(etched, "Параметры случайного процесса"));
 
         jpDataInput.add(new JLabel("<html> <br>количество отсчетов</html>"));
-        JTextField numberOfSamples = new JTextField(26);
+        numberOfSamples = new JTextField(26);
         numberOfSamples.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) { }
@@ -59,6 +63,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_NUMBER_OF_SAMPLES);
                     numberOfSamples.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpDataInput.add(numberOfSamples);
@@ -69,8 +74,8 @@ public class ViewSwing {
 
         jpDataInput.add(new JLabel("способ генерации случайных величин"));
         String[] sWaysOfGeneration = {"корреляционная функция", "с заданным законном распределения"};
-        JRadioButton rbCorrelationFunction = new JRadioButton(sWaysOfGeneration[0],true);
-        JRadioButton rbDistributionLaw = new JRadioButton(sWaysOfGeneration[1],false);
+        rbCorrelationFunction = new JRadioButton(sWaysOfGeneration[0],true);
+        rbDistributionLaw = new JRadioButton(sWaysOfGeneration[1],false);
         rbDistributionLaw.setBackground(color);
         rbCorrelationFunction.setBackground(color);
         ButtonGroup waysOfGeneration = new ButtonGroup();
@@ -81,6 +86,7 @@ public class ViewSwing {
         rbCorrelationFunction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                generateCF = false; generateDL = false;
                 if (rbCorrelationFunction.isSelected()) {
                     jpCorrelationFunction.setPreferredSize(jpDistributionLaw.getPreferredSize());
                     jpCorrelationFunction.setVisible(true);
@@ -93,6 +99,7 @@ public class ViewSwing {
         rbDistributionLaw.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                generateCF = false; generateDL = false;
                 if (rbDistributionLaw.isSelected()) {
                     jpDistributionLaw.setPreferredSize(jpCorrelationFunction.getPreferredSize());
                     jpDistributionLaw.setVisible(true);
@@ -116,25 +123,24 @@ public class ViewSwing {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    if (numberOfSamples.getText().isEmpty()
-                            || (rbCorrelationFunction.isSelected() && correlationFunction == null)
-                            || (rbDistributionLaw.isSelected() && distributionLaw == null))
+                    if (numberOfSamples.getText().isEmpty())
                         throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
-                    randomProcess = new RandomProcess();
-                    randomProcess.setCorrelationFunction(correlationFunction);
-                    randomProcess.setDistributionLaw(distributionLaw);
+                    if (!generateCF || !generateDL)
+                        throw  new Exception(ExceptionMessage.EXCEPTION_NOT_GENERATE_RP);
+                    correlationFunction = new CorrelationFunction();
+                    distributionLaw = new DistributionLaw();
+
+                    randomProcess.setCorrelationFunction(rbCorrelationFunction.isSelected() ? correlationFunction : null);
+                    randomProcess.setDistributionLaw(rbDistributionLaw.isSelected() ? distributionLaw : null);
                     randomProcess.setHypothesisCheck(hypothesisCheck);
                     randomProcess.setWaysOfGeneration(rbDistributionLaw.isSelected() ? sWaysOfGeneration[1] : sWaysOfGeneration[0]);
                     randomProcess.setNumberOfSamples(numberOfSamples.getText().isEmpty() ? null : Integer.parseInt(numberOfSamples.getText()));
 
                     proc =  RandomProcGenerator.generateRandomProc(randomProcess);
-                    jFrame.setSize(new Dimension(width,height));
-                    GridLayout gridLayout = new GridLayoutNew(1,2,5,15);
-                    jPanel.setLayout(gridLayout);
 
+                    clean();
                     getTable();
 
-                    jFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
                 } catch (Exception exception){
                     JOptionPane.showMessageDialog(null,exception.getMessage());
                 }
@@ -193,6 +199,16 @@ public class ViewSwing {
                     hypothesisCheck.setSignificanceCriterion(significanceCriterion.getSelectedItem().toString());
                     hypothesisCheck.setSignificanceLevel(Double.parseDouble(significanceLevel.getSelectedItem().toString()));
 
+                    boolean check;
+                    if (significanceCriterion.getSelectedItem().toString().equals(sSignificanceCriterion[0])){
+                        //UniformDistibutionFunction uniformDistibutionFunction = new UniformDistibutionFunction()
+                        //check = Chi2Test.chi2Test(proc,hypothesisCheck);
+                    } else{
+                        /*check = KSTest.ksTest(proc,hypothesisCheck,
+                                rbDistributionLaw.isSelected() ? 0 : 1,
+                                randomProcess);*/
+                    }
+
                     //TODO: вызов метода проверки гипотезы, вывод сообщения
                 } catch (Exception exception){
                     JOptionPane.showMessageDialog(null,ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
@@ -230,6 +246,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_OSCILLATION_FREQUENCY_VALUE);
                     oscillationFrequencyValue.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpMonotone.add(oscillationFrequencyValue);
@@ -245,6 +262,7 @@ public class ViewSwing {
                     jpMonotone.setVisible(false);
                     jpMonotone.setPreferredSize(new Dimension(0,0));
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpCorrelationFunction.add(kindCorrelationFunction);
@@ -262,6 +280,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_ATTENUATION_RATES);
                     attenuation_rates.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpCorrelationFunction.add(attenuation_rates);
@@ -274,7 +293,8 @@ public class ViewSwing {
                 try {
                     if (attenuation_rates.getText().isEmpty()
                             || (kindCorrelationFunction.getSelectedItem().toString().equals(sKindCorrelationFunction[1])
-                            && oscillationFrequencyValue.getText().isEmpty()))
+                            && oscillationFrequencyValue.getText().isEmpty())
+                            || numberOfSamples.getText().isEmpty())
                         throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
 
                     correlationFunction = new CorrelationFunction();
@@ -282,9 +302,16 @@ public class ViewSwing {
                     correlationFunction.setAttenuationRates(Double.parseDouble(attenuation_rates.getText()));
                     correlationFunction.setOscillationFrequencyValue(!oscillationFrequencyValue.getText().isEmpty()?Double.parseDouble(oscillationFrequencyValue.getText()):null);
 
-                    //TODO: вызов метода генерации, вывод окошка с результатами
+                    randomProcess.setCorrelationFunction(correlationFunction);
+                    randomProcess.setWaysOfGeneration("корреляционная функция");
+                    randomProcess.setNumberOfSamples(numberOfSamples.getText().isEmpty() ? null : Integer.parseInt(numberOfSamples.getText()));
+
+                    proc = RandomProcGenerator.generateRandomProc(randomProcess);
+                    JOptionPane.showMessageDialog(null,"СП успешно сгенерирован!");
+                    generateCF = true;
+                    generateDL = false;
                 } catch (Exception exception){
-                    JOptionPane.showMessageDialog(null,ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
+                    JOptionPane.showMessageDialog(null,"CП не сгенерирован.\nОшибка:\n" + exception.getMessage());
                 }
             }
         });
@@ -322,6 +349,7 @@ public class ViewSwing {
                 } else{
                     setVisibleAndHiddenPanels(jpNormal,jpUniform, jpExponential);
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpDistributionLaw.add(jpNormal);
@@ -333,6 +361,9 @@ public class ViewSwing {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    if (numberOfSamples.getText().isEmpty())
+                        throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
+
                     distributionLaw = new DistributionLaw();
                     distributionLaw.setKindDistributionLaw(kindDistributionLaw.getSelectedItem().toString());
 
@@ -364,9 +395,16 @@ public class ViewSwing {
                         distributionLaw.setIntensity(Double.parseDouble(((JTextField)jpExponential.getComponent(1)).getText()));
                     }
 
-                    //TODO: вызов метода генерации, вывод окошка с результатами
+                    randomProcess.setDistributionLaw(distributionLaw);
+                    randomProcess.setWaysOfGeneration("с заданным законном распределения");
+                    randomProcess.setNumberOfSamples(numberOfSamples.getText().isEmpty() ? null : Integer.parseInt(numberOfSamples.getText()));
+
+                    proc = RandomProcGenerator.generateRandomProc(randomProcess);
+                    JOptionPane.showMessageDialog(null,"СП успешно сгенерирован!");
+                    generateCF = false;
+                    generateDL = true;
                 } catch (Exception exception){
-                    JOptionPane.showMessageDialog(null,ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
+                    JOptionPane.showMessageDialog(null,"CП не сгенерирован.\nОшибка:\n" + exception.getMessage());
                 }
             }
         });
@@ -409,6 +447,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_EXPECTED_VALUE);
                     expected_value.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpNormal.add(expected_value);
@@ -425,6 +464,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_DISPERSION);
                     dispersion.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpNormal.setPreferredSize(new Dimension(400,90));
@@ -449,6 +489,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_RIGHT);
                     right.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpUniform.add(right);
@@ -465,6 +506,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_LEFT);
                     left.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpUniform.add(left);
@@ -489,6 +531,7 @@ public class ViewSwing {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_INTENSITY);
                     intensity.setText("");
                 }
+                generateCF = false; generateDL = false;
             }
         });
         jpExponential.add(intensity);
@@ -574,42 +617,60 @@ public class ViewSwing {
         DefaultTableModel modelNew = (DefaultTableModel)jtNumericalCharacteristic.getModel();
         modelNew.setDataVector(data,headers);
 
-        XYSeriesCollection collectForDistributionLaw = new XYSeriesCollection();
-        collectForDistributionLaw.addSeries(ChartsFactory.getExperimentalDistributionFunctionChart(proc));
-        if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")){
-            collectForDistributionLaw.addSeries(ChartsFactory.getTheoreticalDistributionFunctionChart(distributionLaw,proc));
-        }
-        jpDistributionFunction.add(getChartPanel(ChartFactory.createXYStepChart(
+        jTPDistributionFunction = new JTabbedPane();
+        jTPDistributionFunction.setBackground(color);
+        jTPDistributionFunction.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalDistributionFunctionChart(proc),
                 "Функция распределения",
                 "Значение случ. величины",
-                "F(x)",
-                collectForDistributionLaw
-        )));
+                "F(x)"));
+        if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")){
+            jTPDistributionFunction.add("теоретическая", getChartPanel(ChartsFactory.getTheoreticalDistributionFunctionChart(distributionLaw,proc),
+                    "Функция распределения",
+                    "Значение случ. величины",
+                    "F(x)"));
+        }
+        jpDistributionFunction.add(jTPDistributionFunction);
 
         jpProbabilityDensity.add(getChartPanel(ChartsFactory.getExperimentalDensityFunctionHistogram(proc)));
 
-        XYSeriesCollection collectCorFunc = new XYSeriesCollection();
         if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
-            collectCorFunc.addSeries(ChartsFactory.getExperimentalCorrelationFunctionChart_1(proc,correlationFunction));
-            collectCorFunc.addSeries(ChartsFactory.getTheoreticalCorrelationFunctionChart(correlationFunction,proc));
-
-            jpCorrelationFunctionOutput.add(getChartPanel(ChartFactory.createXYLineChart(
+            jTPCorrFunc = new JTabbedPane();
+            jTPCorrFunc.setBackground(color);
+            jTPCorrFunc.add("эмпирическая", getChartPanel(ChartsFactory.getExperimentalCorrelationFunctionChart_1(proc,correlationFunction),
                     "Корреляционная функция",
                     "Время \"жизни\" СП",
-                    "Коэф. автокорр.",
-                    collectCorFunc
-            )));
+                    "Коэф. автокорр."));
+            jTPCorrFunc.add("теоретическая",getChartPanel(ChartsFactory.getTheoreticalCorrelationFunctionChart(proc,correlationFunction),
+                    "Корреляционная функция",
+                    "Время \"жизни\" СП",
+                    "Коэф. автокорр."));
+
+            jpCorrelationFunctionOutput.add(jTPCorrFunc);
         } else{
-            collectCorFunc.addSeries(ChartsFactory.getTheoreticalDensityFunctionChart(distributionLaw,proc));
-            jpCorrelationFunctionOutput.add(getChartPanel(ChartFactory.createXYLineChart(
+            jpCorrelationFunctionOutput.add(getChartPanel(ChartsFactory.getTheoreticalDensityFunctionChart(distributionLaw,proc),
                     "Теоретическая плотность распределения",
                     "Значение случ. величины",
-                    "Частота",
-                    collectCorFunc
-            )));
+                    "Частота"
+            ));
         }
 
         jpDataOutput.setVisible(true);
+    }
+
+    private void clean(){
+        jPanel.removeAll();
+        jPanel.repaint();
+        jPanel.revalidate();
+
+        getJpDataOutput();
+        jPanel.add(jpDataInput);
+        jPanel.add(jpDataOutput);
+
+        jFrame.setSize(new Dimension(width,height));
+        GridLayout gridLayout = new GridLayoutNew(1,2,5,15);
+        jPanel.setLayout(gridLayout);
+        jFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
+
     }
 
     private ChartPanel getChartPanel(JFreeChart jFreeChart){
@@ -618,6 +679,17 @@ public class ViewSwing {
                 return new Dimension(305, 280);
             }
         };
+    }
+
+    private ChartPanel getChartPanel(XYSeries xySeries, String tittle, String X, String Y){
+        XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        xySeriesCollection.addSeries(xySeries);
+        return getChartPanel(ChartFactory.createXYStepChart(
+                tittle,
+                X,
+                Y,
+                xySeriesCollection
+        ));
     }
 
     public static void main(String[] args) {
@@ -641,8 +713,15 @@ public class ViewSwing {
     private static JPanel jpDistributionFunction;
     private static JPanel jpProbabilityDensity;
     private static JPanel jpCorrelationFunctionOutput;
+    private static JTabbedPane jTPDistributionFunction;
+    private static JTabbedPane jTPCorrFunc;
+    private static JRadioButton rbCorrelationFunction;
+    private static JRadioButton rbDistributionLaw;
+    private static Boolean generateCF = false;
+    private static Boolean generateDL = false;
+    private static JTextField numberOfSamples;
     /**поле генерации процесса*/
-    private static RandomProcess randomProcess;
+    private static RandomProcess randomProcess = new RandomProcess();
     /**поле корреляционной функции*/
     private static CorrelationFunction correlationFunction;
     /**поле закона распределения*/
