@@ -64,7 +64,7 @@ public class DataFactory {
         for (var i = 0; i < proc.length; i+=shift){
             var ls = getLeftShiftedArray(proc, i);
             var rs = getRightShiftedArray(proc, i);
-            series.add(i, getCorrelation(ls, rs, proc));
+            series.add(i, getCorrelation(ls, rs));
         }
         series.add((proc.length - 1), 0);
 
