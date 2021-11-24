@@ -1,4 +1,6 @@
 import charts.ChartsFactory;
+import correlationFunctions.MonotoneCorrelationFunction;
+import correlationFunctions.OscillatingCorrelationFunction;
 import distributionFunctions.ExponentialDistributionFunction;
 import distributionFunctions.GaussianDistributionFunction;
 import distributionFunctions.UniformDistibutionFunction;
@@ -216,18 +218,19 @@ public class ViewSwing {
                         } else{
                             System.out.println("***2");
                             check = Chi2Test.chi2Test(proc, distributionFunction, hypothesisCheck);
+
                         }
-                    } else if (hypothesisCheck.getSignificanceCriterion().equals("критерий согласия Колмогорова")){
+                    } else if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
                         if (randomProcess.getCorrelationFunction().getKindCorrelationFunction().equals("Монотонная")) {
                             System.out.println("*1");
-                            ExponentialDistributionFunction distributionFunction = new ExponentialDistributionFunction(randomProcess.getCorrelationFunction().getAttenuationRates());
-                            check = KSTest.ksTest(proc,distributionFunction,
+                            MonotoneCorrelationFunction distributionFunction = new MonotoneCorrelationFunction(randomProcess.getCorrelationFunction().getAttenuationRates());
+                            check = KSTest.ksTest(proc, distributionFunction,
                                     hypothesisCheck,
                                     1,
-                                    randomProcess);
+                                    randomProcess);;
                         }else{
                             System.out.println("*2");
-                            UniformDistibutionFunction distributionFunction = new UniformDistibutionFunction(randomProcess.getCorrelationFunction().getAttenuationRates(),randomProcess.getCorrelationFunction().getOscillationFrequencyValue());
+                            OscillatingCorrelationFunction distributionFunction = new OscillatingCorrelationFunction(randomProcess.getCorrelationFunction().getAttenuationRates(),randomProcess.getCorrelationFunction().getOscillationFrequencyValue());
                             check = KSTest.ksTest(proc, distributionFunction,
                                     hypothesisCheck,
                                     1,
@@ -629,18 +632,18 @@ public class ViewSwing {
             headers = new String[]{"Момент", "Теоретическое значение", "Эмпирическое значение"};
             //Массив содержащий информацию для таблицы
             data = new Object[][]{
-                    {"1", Calculations.getMathematicalExpectation(randomProcess), Calculations.getMean(proc)},
-                    {"2", Calculations.getTheoreticalDispertion(randomProcess), Calculations.getExperimentalDispertion(proc)},
-                    {"3", Calculations.getTheoreticalAsymmetryCoefficient(randomProcess), Calculations.getExperimentalAsymmetryCoefficient(proc)},
-                    {"4", Calculations.getTheoreticalKurtosisCoefficient(randomProcess), Calculations.getExperimentalKurtosisCoefficient(proc)}
+                    {"Мат. ожидание", Calculations.getMathematicalExpectation(randomProcess), Calculations.getMean(proc)},
+                    {"Дисперсия", Calculations.getTheoreticalDispertion(randomProcess), Calculations.getExperimentalDispertion(proc)},
+                    {"Коэф. асимм.", Calculations.getTheoreticalAsymmetryCoefficient(randomProcess), Calculations.getExperimentalAsymmetryCoefficient(proc)},
+                    {"Коэф. эксцесса", Calculations.getTheoreticalKurtosisCoefficient(randomProcess), Calculations.getExperimentalKurtosisCoefficient(proc)}
             };
         } else{
             headers = new String[]{"Момент","Эмпирическое значение"};
             data = new Object[][]{
-                    {"1", Calculations.getMean(proc)},
-                    {"2", Calculations.getExperimentalDispertion(proc)},
-                    {"3", Calculations.getExperimentalAsymmetryCoefficient(proc)},
-                    {"4", Calculations.getExperimentalKurtosisCoefficient(proc)}
+                    {"Мат. ожидание", Calculations.getMean(proc)},
+                    {"Дисперсия", Calculations.getExperimentalDispertion(proc)},
+                    {"Коэф. асимм.", Calculations.getExperimentalAsymmetryCoefficient(proc)},
+                    {"Коэф. эксцесса", Calculations.getExperimentalKurtosisCoefficient(proc)}
             };
         }
 
