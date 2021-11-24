@@ -1,14 +1,20 @@
 import charts.ChartsFactory;
+import distributionFunctions.ExponentialDistributionFunction;
+import distributionFunctions.GaussianDistributionFunction;
+import distributionFunctions.UniformDistibutionFunction;
 import math.Calculations;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.function.Function2D;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import params.CorrelationFunction;
 import params.DistributionLaw;
 import params.HypothesisCheck;
 import params.RandomProcess;
+import statTests.tests.Chi2Test;
+import statTests.tests.KSTest;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -92,6 +98,7 @@ public class ViewSwing {
                     jpCorrelationFunction.setVisible(true);
                     jpDistributionLaw.setVisible(false);
                     jpDistributionLaw.setPreferredSize(new Dimension(0,0));
+                    significanceCriterion.setModel(new DefaultComboBoxModel(new String[]{"критерий согласия Колмогорова"}));
                 }
             }
         });
@@ -105,6 +112,7 @@ public class ViewSwing {
                     jpDistributionLaw.setVisible(true);
                     jpCorrelationFunction.setVisible(false);
                     jpCorrelationFunction.setPreferredSize(new Dimension(0,0));
+                    significanceCriterion.setModel(new DefaultComboBoxModel(new String[]{"критерий согласия Пирсона", "критерий согласия Колмогорова"}));
                 }
             }
         });
@@ -127,7 +135,7 @@ public class ViewSwing {
                         throw  new Exception(ExceptionMessage.EXCEPTION_NOT_GENERATE_RP);
                     clean();
                     getTable();
-
+                    jFrame.setSize(new Dimension(1010,700));
                 } catch (Exception exception){
                     JOptionPane.showMessageDialog(null,exception.getMessage());
                 }
@@ -143,8 +151,7 @@ public class ViewSwing {
         jpCheck.setBorder(BorderFactory.createTitledBorder(etched, "Проверка гипотезы"));
         jpCheck.add(new JLabel("<html> <br>критерий значимости </html>"));
 
-        String[] sSignificanceCriterion = {"критерий согласия Пирсона", "критерий согласия Колмогорова"};
-        JComboBox significanceCriterion = new JComboBox(sSignificanceCriterion);
+        significanceCriterion = new JComboBox(new String[]{"критерий согласия Колмогорова"});
         significanceCriterion.setPreferredSize(dimensionForJCombobox);
         significanceCriterion.setEditable(true);
         jpCheck.add(significanceCriterion);
@@ -180,25 +187,61 @@ public class ViewSwing {
                 try{
                     if (numberOfDegreesOfFreedom.getText() == null)
                         throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
+                    if (!generateCF && !generateDL)
+                        throw  new Exception(ExceptionMessage.EXCEPTION_NOT_GENERATE_RP);
 
                     hypothesisCheck = new HypothesisCheck();
                     hypothesisCheck.setNumberOfDegreesOfFreedom(Integer.parseInt(numberOfDegreesOfFreedom.getText()));
                     hypothesisCheck.setSignificanceCriterion(significanceCriterion.getSelectedItem().toString());
                     hypothesisCheck.setSignificanceLevel(Double.parseDouble(significanceLevel.getSelectedItem().toString()));
 
-                    boolean check;
-                    if (significanceCriterion.getSelectedItem().toString().equals(sSignificanceCriterion[0])){
-                        //UniformDistibutionFunction uniformDistibutionFunction = new UniformDistibutionFunction()
-                        //check = Chi2Test.chi2Test(proc,hypothesisCheck);
-                    } else{
-                        /*check = KSTest.ksTest(proc,hypothesisCheck,
-                                rbDistributionLaw.isSelected() ? 0 : 1,
-                                randomProcess);*/
-                    }
+                    boolean check = false;
+                    if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")) {
+                        Function2D distributionFunction;
+                        if (randomProcess.getDistributionLaw().getKindDistributionLaw().equals("Равномерное")) {
+                            System.out.println("**1");
+                            distributionFunction = new UniformDistibutionFunction(randomProcess.getDistributionLaw().getLeft(), randomProcess.getDistributionLaw().getRight());
+                        } else if (randomProcess.getDistributionLaw().getKindDistributionLaw().equals("Нормальное")){
+                            System.out.println("**2");
+                            distributionFunction = new GaussianDistributionFunction(randomProcess.getDistributionLaw().getExpectedValue(), randomProcess.getDistributionLaw().getDispersion());
+                        } else{System.out.println("**3");
+                            distributionFunction = new ExponentialDistributionFunction(randomProcess.getDistributionLaw().getIntensity());
+                        }
+                        if (hypothesisCheck.getSignificanceCriterion().equals("критерий согласия Колмогорова")){
+                            System.out.println("***1");
+                            check = KSTest.ksTest(proc,distributionFunction,
+                                    hypothesisCheck,
+                                    0,
+                                    randomProcess);
+                        } else{
+                            System.out.println("***2");
+                            check = Chi2Test.chi2Test(proc, distributionFunction, hypothesisCheck);
+                        }
+                    } else if (hypothesisCheck.getSignificanceCriterion().equals("критерий согласия Колмогорова")){
+                        if (randomProcess.getCorrelationFunction().getKindCorrelationFunction().equals("Монотонная")) {
+                            System.out.println("*1");
+                            ExponentialDistributionFunction distributionFunction = new ExponentialDistributionFunction(randomProcess.getCorrelationFunction().getAttenuationRates());
+                            check = KSTest.ksTest(proc,distributionFunction,
+                                    hypothesisCheck,
+                                    1,
+                                    randomProcess);
+                        }else{
+                            System.out.println("*2");
+                            UniformDistibutionFunction distributionFunction = new UniformDistibutionFunction(randomProcess.getCorrelationFunction().getAttenuationRates(),randomProcess.getCorrelationFunction().getOscillationFrequencyValue());
+                            check = KSTest.ksTest(proc, distributionFunction,
+                                    hypothesisCheck,
+                                    1,
+                                    randomProcess);;
+                        }
 
-                    //TODO: вызов метода проверки гипотезы, вывод сообщения
+                    }
+                    if (check){
+                        JOptionPane.showMessageDialog(null,"Гипотеза прошла проверку");
+                    } else{
+                        JOptionPane.showMessageDialog(null,"Гипотеза не прошла проверку");
+                    }
                 } catch (Exception exception){
-                    JOptionPane.showMessageDialog(null,ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
+                    JOptionPane.showMessageDialog(null,"Ошибка: " + exception.getMessage());
                 }
             }
         });
@@ -728,6 +771,7 @@ public class ViewSwing {
     private static Boolean generateCF = false;
     private static Boolean generateDL = false;
     private static JTextField numberOfSamples;
+    private static JComboBox significanceCriterion;
     /**поле генерации процесса*/
     private static RandomProcess randomProcess = new RandomProcess();
     /**поле корреляционной функции*/
