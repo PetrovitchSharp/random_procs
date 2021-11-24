@@ -562,6 +562,23 @@ public class ViewSwing {
     private JPanel getJPUniform(){
         JPanel jpUniform = new JPanel(new VerticalLayout());
 
+        jpUniform.add(new JLabel("левая граница"));
+        JTextField left = new JTextField(20);
+        left.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!left.getText().isEmpty() && !CheckParameters.isNumberFrom_100to100(left.getText())){
+                    JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_LEFT);
+                    left.setText("");
+                }
+                generateCF = false; generateDL = false;
+            }
+        });
+        jpUniform.add(left);
+
         jpUniform.add(new JLabel("правая граница"));
         JTextField right = new JTextField(20);
         right.addFocusListener(new FocusListener() {
@@ -579,22 +596,6 @@ public class ViewSwing {
         });
         jpUniform.add(right);
 
-        jpUniform.add(new JLabel("левая граница"));
-        JTextField left = new JTextField(20);
-        left.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) { }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (!left.getText().isEmpty() && !CheckParameters.isNumberFrom_100to100(left.getText())){
-                    JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_LEFT);
-                    left.setText("");
-                }
-                generateCF = false; generateDL = false;
-            }
-        });
-        jpUniform.add(left);
         jpUniform.setPreferredSize(new Dimension(0,0));
         return jpUniform;
     }
