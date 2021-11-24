@@ -38,7 +38,7 @@ public class KSTable {
             Map.entry(0.05,2),
             Map.entry(0.025,3),
             Map.entry(0.01, 4),
-            Map.entry(0.005, 5)
+            Map.entry(0.001, 5)
     );
 
     /**

@@ -197,8 +197,13 @@ public class ChartsFactory {
         var N1 = (int)Math.round(T/eps);
         var in = (int)Math.ceil((double) numOfSamples / N1);
 
+        if (corrFunc.getKindCorrelationFunction().equals("Монотонная")){
+            return 15;
+        }
+        else {
+            return 30;
+        }
 
         //return in+1;
-        return 30;
     }
 }

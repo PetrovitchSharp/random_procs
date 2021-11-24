@@ -86,6 +86,9 @@ public class DataFactory {
 
         for (var i = 0; i < proc.length; i+=shift){
             var eps = (2*rnd.nextDouble()-1)*func.getValue(timeStep*i)/8;
+            if (i == 0){
+                eps = 0;
+            }
             series.add(i, func.getValue(timeStep*i)+eps);
         }
         series.add((proc.length - 1), 0);
