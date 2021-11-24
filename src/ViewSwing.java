@@ -26,6 +26,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
+import java.net.URI;
 
 public class ViewSwing {
 
@@ -39,6 +41,13 @@ public class ViewSwing {
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setPreferredSize(new Dimension(290, height));
 
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(getInfAboutDevelopers());
+        menuBar.add(getInfAboutSystem());
+        // JMenuBar использует блочное расположение (заполнитель вполне уместен)
+        menuBar.add(Box.createHorizontalGlue());
+
+        jFrame.setJMenuBar(menuBar);
         jPanel = new JPanel();
 
         getJpDataInput();
@@ -50,6 +59,55 @@ public class ViewSwing {
         jFrame.add(jPanel);
         jFrame.pack();
         jFrame.setVisible(true);
+    }
+
+    private JMenu getInfAboutDevelopers(){
+        JMenu infAboutDevelopers = new JMenu("О разработчиках");
+
+        JMenuItem jMenuItem = new JMenuItem("Открыть");
+
+        jMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,"<html><p><center>Самарский университет, факультет информатики <br>" +
+                        "Курсовой проект по дисциплине 'Программная инженерия' <br>по теме 'Система моделирования случайных<br>" +
+                        "процессов заданного вида и расчета их характеристик'<br><br>" +
+                        "<center>Разработчики (студенты группы 6413-020302D): <br>" +
+                        "Корчагин П.П.<br>" +
+                        "Медведева Е.С.<br>" +
+                        "2021 г.</p></html>");
+
+            }
+        });
+        infAboutDevelopers.add(jMenuItem);
+
+        return infAboutDevelopers;
+
+    }
+
+    private JMenu getInfAboutSystem(){
+        JMenu infAboutSystem = new JMenu("О системе");
+
+        JMenuItem jMenuItem = new JMenuItem("Открыть");
+
+        jMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+                    assert desktop != null;
+                    desktop.open(new File("infAboutSystem.html"));
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_OPEN_FILE);
+                }
+
+            }
+        });
+
+        infAboutSystem.add(jMenuItem);
+
+        return infAboutSystem;
+
     }
 
     /** Метод создания панели для ввода данных*/
@@ -201,35 +259,29 @@ public class ViewSwing {
                     if (randomProcess.getWaysOfGeneration().equals("с заданным законном распределения")) {
                         Function2D distributionFunction;
                         if (randomProcess.getDistributionLaw().getKindDistributionLaw().equals("Равномерное")) {
-                            System.out.println("**1");
                             distributionFunction = new UniformDistibutionFunction(randomProcess.getDistributionLaw().getLeft(), randomProcess.getDistributionLaw().getRight());
                         } else if (randomProcess.getDistributionLaw().getKindDistributionLaw().equals("Нормальное")){
-                            System.out.println("**2");
                             distributionFunction = new GaussianDistributionFunction(randomProcess.getDistributionLaw().getExpectedValue(), randomProcess.getDistributionLaw().getDispersion());
-                        } else{System.out.println("**3");
+                        } else{
                             distributionFunction = new ExponentialDistributionFunction(randomProcess.getDistributionLaw().getIntensity());
                         }
                         if (hypothesisCheck.getSignificanceCriterion().equals("критерий согласия Колмогорова")){
-                            System.out.println("***1");
                             check = KSTest.ksTest(proc,distributionFunction,
                                     hypothesisCheck,
                                     0,
                                     randomProcess);
                         } else{
-                            System.out.println("***2");
                             check = Chi2Test.chi2Test(proc, distributionFunction, hypothesisCheck);
 
                         }
                     } else if (randomProcess.getWaysOfGeneration().equals("корреляционная функция")){
                         if (randomProcess.getCorrelationFunction().getKindCorrelationFunction().equals("Монотонная")) {
-                            System.out.println("*1");
                             MonotoneCorrelationFunction distributionFunction = new MonotoneCorrelationFunction(randomProcess.getCorrelationFunction().getAttenuationRates());
                             check = KSTest.ksTest(proc, distributionFunction,
                                     hypothesisCheck,
                                     1,
                                     randomProcess);;
                         }else{
-                            System.out.println("*2");
                             OscillatingCorrelationFunction distributionFunction = new OscillatingCorrelationFunction(randomProcess.getCorrelationFunction().getAttenuationRates(),randomProcess.getCorrelationFunction().getOscillationFrequencyValue());
                             check = KSTest.ksTest(proc, distributionFunction,
                                     hypothesisCheck,
@@ -798,7 +850,7 @@ public class ViewSwing {
     /**поле ширины для фрейма*/
     private static final int width = 1000;
     /**поле высоты для фрейма*/
-    private static final int height = 660;
+    private static final int height = 700;
 
     private class GridLayoutNew extends GridLayout{
         public GridLayoutNew(int rows, int cols, int hgap, int vgap) {

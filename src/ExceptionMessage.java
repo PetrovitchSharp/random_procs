@@ -11,5 +11,6 @@ public class ExceptionMessage {
     public static String EXCEPTION_NOT_ALL_PARAMETERS = "Вы заполнили не все параметры!";
     public static String EXCEPTION_NOT_GENERATE_RP = "СП еще не сгенерирован, расчет невозможен";
     public static String EXCEPTION_LEFT_IS_MORE_RIGHT = "Левая граница не может быть больше правой!";
+    public static String EXCEPTION_OPEN_FILE = "Произошла ошибка при октрытии файла! Возможно, файл поврежден";
 
 }
