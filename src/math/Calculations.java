@@ -1,6 +1,5 @@
 package math;
 
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import params.CorrelationFunction;
 import params.RandomProcess;
 
@@ -139,28 +138,26 @@ public class Calculations {
 
     /**
      * Расчет автокорреляции СП в заданной точке
-     * @param originalProcess Обрезанный СП
-     * @param shiftedProcess Сдвинутый СП
+     * @param proc СП
+     * @param shift Сдвиг
      * @return Коэффициент автокорреляции
      */
-    public static double getCorrelation(double[] originalProcess, double[] shiftedProcess){
-//        var len = originalProcess.length;
-//
-//        var sumOfShifts = 0.;
-//        var sumOfSquaredDeviations = 0.;
-//
-//        var mean = getMean(proc);
-//        for (var pr:proc) {
-//            sumOfSquaredDeviations += Math.pow(pr - mean,2);
-//        }
-//
-//        for (var i = 0; i < len; i++){
-//            sumOfShifts += (originalProcess[i] - mean)*(shiftedProcess[i] - mean);
-//        }
+    public static double getCorrelation(double[] proc, int shift){
+        var len = proc.length;
 
-        var corr = new PearsonsCorrelation();
-        return corr.correlation(originalProcess, shiftedProcess);
-        //return sumOfShifts / sumOfSquaredDeviations;
+        var sumOfShifts = 0.;
+        var sumOfSquaredDeviations = 0.;
+
+        var mean = getMean(proc);
+        for (var pr:proc) {
+            sumOfSquaredDeviations += Math.pow(pr - mean,2);
+        }
+
+        for (var i = 0; i < len - shift; i++){
+            sumOfShifts += (proc[i] - mean)*(proc[i+shift] - mean);
+        }
+
+        return sumOfShifts / sumOfSquaredDeviations;
     }
 
     /**

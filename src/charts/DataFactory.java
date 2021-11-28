@@ -8,10 +8,10 @@ import params.CorrelationFunction;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
 
-import static math.Calculations.*;
-import static math.Utils.getLeftShiftedArray;
-import static math.Utils.getRightShiftedArray;
+import static math.Calculations.getCorrelation;
+import static math.Calculations.getTimeStep;
 
 /**
  * Методы, генерирующие данные для визуализации
@@ -24,15 +24,17 @@ public class DataFactory {
      * @return Набор данных для визуализации эмпирической функции распределения
      */
     public static XYSeries getExperimentalDistributionFunctionData(double[] proc, int lenOfSeries){
-        Arrays.sort(proc);
+        var sorted = Arrays.copyOf(proc, proc.length);
 
-        var shift = proc.length / (lenOfSeries - 1);
+        Arrays.sort(sorted);
+
+        var shift = sorted.length / (lenOfSeries - 1);
 
         var series = new XYSeries("Эмпирическая функция распределения");
-        for (var i = 0; i < proc.length; i+=shift){
-            series.add(proc[i],(double) i/proc.length);
+        for (var i = 0; i < sorted.length; i+=shift){
+            series.add(sorted[i],(double) i/sorted.length);
         }
-        series.add(proc[proc.length-1],1);
+        series.add(sorted[sorted.length-1],1);
 
         return series;
     }
@@ -61,12 +63,18 @@ public class DataFactory {
         var series = new XYSeries("Эмпирическая корреляционная функция");
         var shift = proc.length / (lenOfSeries - 1);
 
-        for (var i = 0; i < proc.length; i+=shift){
-            var ls = getLeftShiftedArray(proc, i);
-            var rs = getRightShiftedArray(proc, i);
-            series.add(i, getCorrelation(ls, rs));
+        var last_twenty = new ArrayBlockingQueue<Double>(20);
+
+        for (var i = 0; i < proc.length; i++){
+            series.add(i, getCorrelation(proc,i));
+            if (i >= 20){
+                last_twenty.poll();
+            }
+
+            last_twenty.add(getCorrelation(proc,i));
+
+            if (checkLastTwenty(last_twenty, 0.05)) break;
         }
-        series.add((proc.length - 1), 0);
 
         return series;
     }
@@ -89,9 +97,9 @@ public class DataFactory {
             if (i == 0){
                 eps = 0;
             }
-            series.add(i, func.getValue(timeStep*i)+eps);
+            series.add(i*timeStep, func.getValue(timeStep*i)+eps);
         }
-        series.add((proc.length - 1), 0);
+        series.add((proc.length - 1)*timeStep, 0);
 
         return series;
     }
@@ -147,10 +155,25 @@ public class DataFactory {
         var i = 0;
 
         while (i < numOfSamples){
-            series.add(i, realFunction.getValue(timeStep*i));
+            series.add(i*timeStep, realFunction.getValue(timeStep*i));
             i++;
         }
 
         return series;
+    }
+
+    /**
+     * Проверка последних 20 показателей корреляции
+     * @param lt Массив из последних 20 значений корреляции
+     * @param eps Ограничение на величину корреляции
+     * @return Находятся ли последние 20 значений в заданном коридоре или нет
+     */
+    private static boolean checkLastTwenty(ArrayBlockingQueue<Double> lt, double eps){
+        for (var val:
+                lt) {
+            if (Math.abs(val) > eps) return false;
+        }
+
+        return true;
     }
 }

@@ -27,7 +27,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
-import java.net.URI;
 
 public class ViewSwing {
 
@@ -466,12 +465,12 @@ public class ViewSwing {
                                 || ((JTextField)jpUniform.getComponent(3)).getText().isEmpty())
                             throw new Exception(ExceptionMessage.EXCEPTION_NOT_ALL_PARAMETERS);
 
-                        if (Double.parseDouble(((JTextField)jpUniform.getComponent(1)).getText())
-                                < Double.parseDouble(((JTextField)jpUniform.getComponent(3)).getText()))
+                        if (Double.parseDouble(((JTextField)jpUniform.getComponent(3)).getText())
+                                < Double.parseDouble(((JTextField)jpUniform.getComponent(1)).getText()))
                             throw new Exception(ExceptionMessage.EXCEPTION_LEFT_IS_MORE_RIGHT);
 
-                        distributionLaw.setRight(Double.parseDouble(((JTextField)jpUniform.getComponent(1)).getText()));
-                        distributionLaw.setLeft(Double.parseDouble(((JTextField)jpUniform.getComponent(3)).getText()));
+                        distributionLaw.setRight(Double.parseDouble(((JTextField)jpUniform.getComponent(3)).getText()));
+                        distributionLaw.setLeft(Double.parseDouble(((JTextField)jpUniform.getComponent(1)).getText()));
                     } else{
 
                         if (((JTextField)jpExponential.getComponent(1)).getText().isEmpty())
