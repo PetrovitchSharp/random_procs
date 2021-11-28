@@ -78,27 +78,4 @@ public class KSTest {
         return StatUtils.max(d) * Math.sqrt(len);
     }
 
-    private static double[] prepare_1(XYSeries procSample){
-        var len = procSample.getItemCount();
-        var d = new double[len];
-
-        for (var i = 0; i < len; i++){
-            d[i] = (double) procSample.getY(i);
-        }
-
-        return d;
-
-    }
-
-    private static double[] prepare_2(XYSeries procSample, Function2D func){
-        var len = procSample.getItemCount();
-        var d = new double[len];
-
-        for (var i = 0; i < len; i++){
-            d[i] = func.getValue((double) procSample.getX(i));
-        }
-
-        return d;
-
-    }
 }
