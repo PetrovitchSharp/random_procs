@@ -96,7 +96,7 @@ public class ViewSwing {
                 try {
                     Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
                     assert desktop != null;
-                    desktop.open(new File("infAboutSystem.html"));
+                    desktop.open(new File("infAboutSystem/infAboutSystem.html"));
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(null, ExceptionMessage.EXCEPTION_OPEN_FILE);
                 }
