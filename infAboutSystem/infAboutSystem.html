@@ -110,9 +110,29 @@
                     <img src="img/img8.jpg" alt="рисунок 8" width="900" height="600">
                     <p>Рисунок 8 - Панель для вывода результатов.</p>
                         </form>
+
             </nav>
-    
-    
+    <button onclick="topFunction()" id="myBtn">Вверх</button>
+
 </main>
+<script>
+            //Когда пользователь прокручивает вниз 20 пикселей от начала, показать кнопку
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("myBtn").style.display = "block";
+             } else {
+                document.getElementById("myBtn").style.display = "none";
+              }
+        }
+
+        // Когда пользователь нажимает кнопку, прокрутить до начала
+        function topFunction() {
+            document.documentElement.scrollTop = 0;
+        }
+</script>
+
 </body>
+
 </html>
