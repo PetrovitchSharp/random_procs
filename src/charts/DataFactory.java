@@ -99,7 +99,7 @@ public class DataFactory {
             }
             series.add(i*timeStep, func.getValue(timeStep*i)+eps);
         }
-        series.add((proc.length - 1)*timeStep, 0);
+        series.add((proc.length - 1)*timeStep, 0.05);
 
         return series;
     }

@@ -199,7 +199,7 @@ public class Calculations {
      * @return Сдвиг для КФ
      */
     public static double getTimeStep(CorrelationFunction corrFunction, int numOfSamples){
-        var tauMax = 4.61/corrFunction.getAttenuationRates();
+        var tauMax = 3/corrFunction.getAttenuationRates();
         return tauMax / numOfSamples;
     }
 }

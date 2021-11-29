@@ -1,6 +1,5 @@
 package statTests.tests;
 
-import math.Calculations;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jfree.data.function.Function2D;
 import org.jfree.data.xy.XYSeries;
@@ -60,14 +59,9 @@ public class KSTest {
     private static double ksTestValue(XYSeries procSample, Function2D realFunction, RandomProcess randProc, int type){
         var len = procSample.getItemCount();
         var d = new double[len];
-        var multiplier = 1.;
-
-        if (type == 1){
-            multiplier = Calculations.getTimeStep(randProc.getCorrelationFunction(), randProc.getNumberOfSamples());
-        }
 
         for (var i = 0; i < len; i++){
-            var expVal = realFunction.getValue(multiplier*(double) procSample.getX(i));
+            var expVal = realFunction.getValue((double) procSample.getX(i));
             var realVal =(double) procSample.getY(i);
             d[i] = Math.max(
                     expVal - realVal,
