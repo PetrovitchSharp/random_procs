@@ -1,20 +1,20 @@
 body {
     margin:0;
-    background-color: #AAD5AA;
+    background-color: #FFFFE0;
 }
 .content form{
     margin-top: 10px;
     position: relative;
     width: 90%;
     margin-left: 5%;
-    background-color: #7AC47A;
+    background-color: #FFE4B5;
 }
 .content p{
   text-indent: 10px;
   text-align: justify; 
   margin-left: 20px; 
   margin-right: 10px; 
-  font: 16px Bradley Hand; 
+  font: 20px Bradley Hand;
 }
 
 .content li{
@@ -22,12 +22,12 @@ body {
   text-align: justify; 
   margin-left: 20px; 
   margin-right: 10px; 
-  font: 16px Bradley Hand; 
+  font: 20px Bradley Hand;
 }
 
 .content div{
-    background: #B1DAA1; /* Цвет фона */
-    border: 3px solid #4F9932; /* Белая рамка */
+    background: #FFFACD; /* Цвет фона */
+    border: 3px solid #DEB887; /* Белая рамка */
     border-radius: 10px; /* Радиус скругления */
     margin: 30px;
 }

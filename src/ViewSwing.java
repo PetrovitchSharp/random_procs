@@ -68,10 +68,12 @@ public class ViewSwing {
         jMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,"<html><p><center>Самарский университет, факультет информатики <br>" +
-                        "Курсовой проект по дисциплине 'Программная инженерия' <br>по теме 'Система моделирования случайных<br>" +
+                JOptionPane.showMessageDialog(null,"<html><p><center>Самарский университет " +
+                        "<br> Факультет информатики <br>" +
+                        "<br>Курсовой проект по дисциплине 'Программная инженерия'" +
+                        " <br>по теме 'Система моделирования случайных<br>" +
                         "процессов заданного вида и расчета их характеристик'<br><br>" +
-                        "<center>Разработчики (студенты группы 6413-020302D): <br>" +
+                        "Разработчики студенты группы 6413-020302D: <br>" +
                         "Корчагин П.П.<br>" +
                         "Медведева Е.С.<br>" +
                         "2021 г.</p></html>");
@@ -627,7 +629,7 @@ public class ViewSwing {
     /** Метод создания панели для вывода данных*/
     private void getJpDataOutput(){
         jpDataOutput = new JPanel();
-        jpDataOutput.setPreferredSize(new Dimension(width - 290, 660));
+        jpDataOutput.setPreferredSize(new Dimension(width - 290, 700));
 
         GridLayout gridLayout = new GridLayout(2,2,5,15);
         jpDataOutput.setLayout(gridLayout);
