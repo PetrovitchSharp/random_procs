@@ -33,12 +33,12 @@ public class KSTable {
      * Соответствие уровня значимости индексу столбца в матрице
      */
     private final Map<Double, Integer> _signLevels = Map.ofEntries(
-            Map.entry(0.2,0),
-            Map.entry(0.1,1),
-            Map.entry(0.05,2),
-            Map.entry(0.025,3),
-            Map.entry(0.01, 4),
-            Map.entry(0.001, 5)
+            Map.entry(0.2,5),
+            Map.entry(0.1,4),
+            Map.entry(0.05,3),
+            Map.entry(0.025,2),
+            Map.entry(0.01, 1),
+            Map.entry(0.001, 0)
     );
 
     /**
@@ -48,6 +48,6 @@ public class KSTable {
      * @return Критическое значение
      */
     public double getCritivalValue(int degreesOfFreedom, double significanceLevel){
-        return _ksTable[degreesOfFreedom-10][_signLevels.get(significanceLevel)];
+        return _ksTable[16-(degreesOfFreedom-10)][_signLevels.get(significanceLevel)];
     }
 }
